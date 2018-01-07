@@ -7,7 +7,7 @@ Originally made by Kanine and adapted for Aussie Broadband by HD on the whirlpoo
 
 ![ABB-illustro-skin](ABB-illustro-skin.jpg)
 
-[Desktop preview](ABBUsage/rainmeter-illustro-abbskin.jpg)
+[Desktop preview](BOM-illustro-preview.jpg)
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/)
