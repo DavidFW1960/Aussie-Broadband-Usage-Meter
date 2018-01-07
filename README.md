@@ -5,7 +5,9 @@ Originally made by Kanine and adapted for Aussie Broadband by HD on the whirlpoo
  - [Bigpond Usage Meters](https://forums.whirlpool.net.au/forum-replies.cfm?t=1942079&p=9#r170)
  - [Aussie Broadband Usage Meters](https://forums.whirlpool.net.au/forum-replies.cfm?t=2679153&r=55439756#r55439756)
 
-**[Preview image](ABBUsage/rainmeter-illustro-abbskin.jpg)**
+![ABB-illustro-skin](ABB-illustro-skin.jpg)
+
+[Desktop preview](ABBUsage/rainmeter-illustro-abbskin.jpg)
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/)
