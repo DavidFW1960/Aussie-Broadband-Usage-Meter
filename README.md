@@ -11,7 +11,7 @@ Originally made by Kanine and adapted for Aussie Broadband by HD on the whirlpoo
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/)
-2) Download [AussieBroadBand Usage Meter_0.02.rmskin](/AussieBroadBand Usage Meter_0.02.rmskin)
+2) Download [AussieBroadBand Usage Meter_0.02.rmskin](/AussieBroadBand%20Usage%20Meter_0.02.rmskin)
 3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be propted for your Aussie Broadband login details that will be encrypted and stored locally.
 4) There will be two (or more) .ini skin files:
  - The original ABB.ini by HD
