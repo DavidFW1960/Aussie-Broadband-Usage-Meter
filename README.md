@@ -17,3 +17,5 @@ Note you can change transparency in that panel.
 
 On first load it will prompt for ABB username and password
 
+In this version, I added a calculation to take into account how much of the current day has been used for days remaining and also days used and am using that to give a more accurate estimate of daily use.
+
