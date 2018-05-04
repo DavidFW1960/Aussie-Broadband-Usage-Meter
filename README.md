@@ -15,6 +15,8 @@ Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11 and
 In Rainmeter, select Manage Skins and in the Aussie Broadband folder select abb.ini and load it.
 Note you can change transparency in that panel.
 
+On the main skin, clicking the ABB icon will load the customer portal at Aussie.
+
 On first load it will prompt for ABB username and password
 
 In this version, I added a calculation to take into account how much of the current day has been used for days remaining and also days used and am using that to give a more accurate estimate of daily use.
