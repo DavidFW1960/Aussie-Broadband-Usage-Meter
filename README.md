@@ -19,5 +19,7 @@ On the main skin, clicking the ABB icon will load the customer portal at Aussie.
 
 On first load it will prompt for ABB username and password
 
-In this version, I added a calculation to take into account how much of the current day has been used for days remaining and also days used and am using that to give a more accurate estimate of daily use.
+In this version, I added a calculation to take into account how much of the current day has been used for days remaining and also days used and am using that to give a more accurate estimate of daily use. I am also now showing the Allowance per day at start of month and remaining with the other information in the tooltip as per the image here.
+
+If you are over your quota for this stage of the month the percent used bar will be red.
 
