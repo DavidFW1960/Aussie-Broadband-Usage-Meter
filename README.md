@@ -15,10 +15,12 @@ Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11 and
 There are variants with a solid bar, 5px and 8px as well as dashed bat 5px and 8px. The Data used bar is graded in colour from green to red. Also included are HD's original and Jayden's modified skin. The ABB.ini skin is the same as the 5px image one and is my current favourite skin.
 
 The graded skins look like this:
+
 ![ABB Graded Colour Skin](abb-5px.png)
 
 The Manage Skin Screen looks like this:
-![Manage Skin](manage-skin.png)
+
+![Manage Skin](manage-skins.png)
 
 In Rainmeter, select Manage Skins and in the Aussie Broadband folder select abb.ini and load it (see above graphic).
 Note you can change transparency in that panel.
