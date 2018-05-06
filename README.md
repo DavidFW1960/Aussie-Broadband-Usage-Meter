@@ -5,14 +5,22 @@ Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11 and
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/)
-2) Download [Aussie Broadband Usage 0.26.rmskin](/Aussie%20Broadband%20Usage%200.26.rmskin)
+2) Download [Aussie Broadband Usage 0.28.rmskin](/Aussie%20Broadband%20Usage%200.28.rmskin)
 3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be propted for your Aussie Broadband login details that will be encrypted and stored locally.
 
 ![ABB Skin](abb.jpg)
 
-4) There will be one .ini skin files:
+4) There will be seven .ini skin files:
 
-In Rainmeter, select Manage Skins and in the Aussie Broadband folder select abb.ini and load it.
+There are variants with a solid bar, 5px and 8px as well as dashed bat 5px and 8px. The Data used bar is graded in colour from green to red. Also included are HD's original and Jayden's modified skin. The ABB.ini skin is the same as the 5px image one and is my current favourite skin.
+
+The graded skins look like this:
+![ABB Graded Colour Skin](abb-5px.png)
+
+The Manage Skin Screen looks like this:
+![Manage Skin](manage-skin.png)
+
+In Rainmeter, select Manage Skins and in the Aussie Broadband folder select abb.ini and load it (see above graphic).
 Note you can change transparency in that panel.
 
 On the main skin, clicking the ABB icon will load the customer portal at Aussie.
