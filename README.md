@@ -39,7 +39,7 @@ If you are over your quota for this stage of the month the percent used bar will
 
 So I made some major changes in this version. I have moved all the colours and images from being scattered in the .ini file to now all being specified in the variables section. If you edit the abb.ini file (or any of the others except HD's and Jayden's) scroll down to line 21. It looks like this:
 
-<code>
+```
 [Variables]
 fontName=Trebuchet MS
 textSize=8
@@ -53,7 +53,7 @@ solidColorSet=0,0,0,255
 barStyleSize=image5px
 ;Set the nominal allowance if required. 0 means value is read from ABB otherwise enter GB allowance (so you see data used bar)
 nominalAllowance=0
-</code>
+```
 
 Here, you can set the bar colours for a solid bar for Days remaining, Data Used and a data used colour that indicates you will go over your allowance based on usage in the month to date. As a default I'm using blue (8,71,174), green (34,177,76) and red (255,0,0) for these as above. The 4th term in the colour is the alpha value, 255 for each.
 
