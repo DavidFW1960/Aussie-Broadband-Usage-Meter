@@ -47,6 +47,12 @@ colorBarDays=8,71,174,255
 colorBarData=34,177,76,255
 colorBarOver=255,0,0,255
 colorText=255,255,255,205
+imageBarDays5px=#@#Images\DaysRemaining-5px.png
+imageBarDays8px=#@#Images\DaysRemaining-8px.png
+imageBarData5px=#@#Images\DataUsedProgress-5px.png
+imageBarData8px=#@#Images\DataUsedProgress-8px.png
+imageBarDataOver5px=#@#Images\DataUsedOver-5px.png
+imageBarDataOver8px=#@#Images\DataUsedOver-8px.png
 fontEffectColorSet=0,0,0,20
 solidColorSet=0,0,0,255
 ;Set the bar size and type. Valid Options are solid5px, solid8px, image5px, image8px
@@ -56,6 +62,12 @@ nominalAllowance=0
 ```
 
 Here, you can set the bar colours for a solid bar for Days remaining, Data Used and a data used colour that indicates you will go over your allowance based on usage in the month to date. As a default I'm using blue (8,71,174), green (34,177,76) and red (255,0,0) for these as above. The 4th term in the colour is the alpha value, 255 for each.
+
+Also if using an image, you can define what image to use here. If you create your own, make sure they are 183px wide and either 5px or 8px high.
+
+Another change is that if you are on an umlimited plan, the data used meter will not show unless you manual;ly overide the allowance by specifying nominalAllowance=1000 (say) as per above.
+
+I am also calculating a Quota Remaining Today number in the tooltip so you know how much quota you can still use for the rest of today and not go into the red zone.
 
 I have also made it possible to set the meter to use either a solid bar or an image and to set the size of these to 5px or 8px. Set the variable barStyleSize to one of the 4 VALID options as shown. You can change the solid bar colours as above and if you wish to change the image, you can make your own and replace or add to my images. You'll need to look for the bar meters below and edit those as well if you want to do this.
 
