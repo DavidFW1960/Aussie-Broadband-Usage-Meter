@@ -77,10 +77,8 @@ Here, you can set the bar colours for a solid bar for Days remaining, Data Used 
 
 Also if using an image, you can define what image to use here. If you create your own, make sure they are 183px wide and either 5px or 8px high.
 
-Another change is that if you are on an umlimited plan, the data used meter will not show unless you manually overide the allowance by specifying nominalAllowance=1000 (say) as per above.
+Another change is that if you are on an umlimited plan, the data used meter will not show unless you manually overide the allowance by specifying nominalAllowance=1000 (say) as per above. Note to 'simulate' an unlimited plan in the meter, Aussie Broadband sets a data allowance of 100000 for unlimited plans so if you enter that as the nominalAllowance, the skin will switch to an unlimited plan and show as unlimited. To use the ABB allowance as defined by ABB, just set the nominalAllowance to 0.
 
 I am also calculating a Quota Remaining Today number in the tooltip so you know how much quota you can still use for the rest of today and not go into the red zone.
 
-I have also made it possible to set the meter to use either a solid bar or an image and to set the size of these to 5px or 8px. Set the variable barStyleSize to one of the 4 VALID options as shown. You can change the solid bar colours as above and if you wish to change the image, you can make your own and replace or add to my images. You'll need to look for the bar meters below and edit those as well if you want to do this.
-
-Additionally, if you are on an unlimited plan, the data used bar will always be blank as there is no 'limit'. To alter this behaviour, as shown above, you can set a nominal limit in GB and the meter and percentages will use that instead of the ABB downloaded measure. Set it back to 0 if you want to 'go' unlimited again.
+I have also made it possible to set the meter to use either a solid bar or an image and to set the size of these to 5px or 8px. Set the variable barStyleSize to one of the 4 VALID options as shown. You can change the solid bar colours as above and if you wish to change the image, you can make your own and replace or add to my images. All references to the bar or image used are in the variables section as shown above.
