@@ -15,7 +15,7 @@ HD's and Jayden's skins are distributed in the RMSKIN file as well.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
 ![ABB Skin for plans without a limit](unlimited%20plans.png)
-![ABB Skin Solid Bar](abb.jpg)
+![ABB Skin Solid Bar](abb-solid.png)
 
 4) There will be seven .ini skin files:
 
