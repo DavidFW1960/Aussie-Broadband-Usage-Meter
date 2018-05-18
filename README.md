@@ -12,7 +12,7 @@ Thanks also to nclemeur for identifying and fixing a password issue with complex
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
 2) Download [Aussie Broadband Usage 0.38.rmskin](/Aussie%20Broadband%20Usage%200.38.rmskin)
-3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be propted for your Aussie Broadband login details that will be encrypted and stored locally.
+3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be prompted for your Aussie Broadband login details that will be encrypted and stored locally.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
 ![ABB Skin for plans without a limit](unlimited%20plans.png)
