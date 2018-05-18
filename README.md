@@ -83,3 +83,5 @@ I am also calculating a Quota Remaining Today number in the tooltip so you know 
 I have also made it possible to set the meter to use either a solid bar or an image and to set the size of these to 5px or 8px. Set the variable barStyleSize to one of the 4 VALID options as shown. You can change the solid bar colours as above and if you wish to change the image, you can make your own and replace or add to my images. You'll need to look for the bar meters below and edit those as well if you want to do this.
 
 Additionally, if you are on an unlimited plan, the data used bar will always be blank as there is no 'limit'. To alter this behaviour, as shown above, you can set a nominal limit in GB and the meter and percentages will use that instead of the ABB downloaded measure. Set it back to 0 if you want to 'go' unlimited again.
+
+Thanks also to nclemeur for identifying and fixing a password issue with complex passwords.
