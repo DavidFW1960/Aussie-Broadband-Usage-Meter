@@ -102,7 +102,9 @@ Function UpdateStats ()
   
   Set f = fs.OpenTextFile(wAppDir & "\" & log_file & "-Configuration.txt")
   wUserDetails = f.readall
-  f.close
+  f.close                                                                                                        												
+  wUserDetails = Decrypt(wUserDetails)
+  wUserDetails = URLEncode(wUserDetails)
   
   wUserName = parse_item (wUserDetails, "User Name =", "<<<")
   
@@ -114,7 +116,7 @@ Function UpdateStats ()
 
   wURL = "https://my.aussiebroadband.com.au/usage.php?xml=yes"
   
-  wSendParams="login_username=" & wUsername & "&login_password=" & Decrypt(wUserDetails)
+  wSendParams="login_username=" & wUsername & "&login_password=" & wUserDetails
   
   wxml.Open "POST", wURL, False
 
@@ -217,6 +219,23 @@ Function Decrypt(Str)
 
  Decrypt = Newstr
 
+End Function
+
+Function URLEncode(StringToEncode)
+  Dim TempAns, CurChr, iChar
+  CurChr = 1
+  Do Until CurChr - 1 = Len(StringToEncode)
+    iChar = Asc(Mid(StringToEncode, CurChr, 1))
+    If (iChar > 47 And iChar < 58)  Or (iChar > 64 And iChar < 91) Or (iChar > 96 And iChar < 123) Then
+      TempAns = TempAns & Mid(StringToEncode, CurChr, 1)
+    ElseIf iChar = 32 Then
+      TempAns = TempAns & "%" & Hex(32)      
+    Else
+      TempAns = TempAns & "%" & Right("00" & Hex(Asc(Mid(StringToEncode, CurChr, 1))), 2)
+    End If
+    CurChr = CurChr + 1
+  Loop
+  URLEncode = TempAns
 End Function
 
 Function MyLPad (MyValue, MyPadChar, MyPaddedLength) 
