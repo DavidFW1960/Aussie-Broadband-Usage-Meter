@@ -2,13 +2,20 @@
 AussieBroadband usage meter skin for Rainmeter.
 
 Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11 and Big Kahuna on the whirlpool forums
+[Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
+[HD's ABB Original](https://www.dropbox.com/sh/rurvj80pp12lvkj/AAAI5EmF5BHDSpeezSqHJouBa)
+[Jandakot11's ABB Modified](https://github.com/jaydenmorris1/AussieBroadband-Usage-Meter)
+HD's and Jayden's skins are distributed in the RMSKIN file as well.
+
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
 2) Download [Aussie Broadband Usage 0.37.rmskin](/Aussie%20Broadband%20Usage%200.37.rmskin)
 3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be propted for your Aussie Broadband login details that will be encrypted and stored locally.
 
-![ABB Skin](abb.jpg)
+![ABB Skin for plans with a limit](plans%20with%20limit.png)
+![ABB Skin for plans without a limit](unlimited%20plans.png)
+![ABB Skin Solid Bar][abb.jpg]
 
 4) There will be seven .ini skin files:
 
