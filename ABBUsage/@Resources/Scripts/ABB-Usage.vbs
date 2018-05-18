@@ -102,16 +102,15 @@ Function UpdateStats ()
   
   Set f = fs.OpenTextFile(wAppDir & "\" & log_file & "-Configuration.txt")
   wUserDetails = f.readall
-  f.close                                                                                                        												
-  wUserDetails = Decrypt(wUserDetails)
-  wUserDetails = URLEncode(wUserDetails)
-  
+  f.close                                                                                                        												  
   wUserName = parse_item (wUserDetails, "User Name =", "<<<")
   
   Set f = fs.OpenTextFile(wAppDir & "\" & log_file & "-EncrytpedPassword.txt")
   wUserDetails = f.readall
   f.close
-
+  wUserDetails = Decrypt(wUserDetails)
+  wUserDetails = URLEncode(wUserDetails)
+  
   Set wxml = CreateObject("MSXML2.ServerXMLHTTP.6.0")
 
   wURL = "https://my.aussiebroadband.com.au/usage.php?xml=yes"
