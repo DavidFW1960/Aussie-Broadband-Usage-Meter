@@ -11,7 +11,7 @@ Thanks also to nclemeur for identifying and fixing a password issue with complex
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
-2) Download [Aussie Broadband Usage 0.38.rmskin](/Aussie%20Broadband%20Usage%200.38.rmskin)
+2) Download [Aussie Broadband Usage 0.39.rmskin](/Aussie%20Broadband%20Usage%200.39.rmskin)
 3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be prompted for your Aussie Broadband login details that will be encrypted and stored locally.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
@@ -21,6 +21,8 @@ Thanks also to nclemeur for identifying and fixing a password issue with complex
 4) There will be seven .ini skin files:
 
 There are variants with a solid bar (see above), 5px and 8px as well as dashed bar 5px (see below) and 8px. The Data used bar is graded in colour from green to red. Also included are HD's original and Jayden's modified skin. The ABB.ini skin is the same as the 5px image one and is my current favourite skin.
+
+I also added a large font variant that is a larger meter and has different graphics. The bar style and height can be changed in the same way as the other skins.
 
 The only difference between these is I have edited the variable barStyleSize to select the right image or colour bar size as per the below but otherwise all of the variants are identical (except for HD and Jayden's originals of course)
 
