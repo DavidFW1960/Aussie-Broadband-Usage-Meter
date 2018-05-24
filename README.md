@@ -22,7 +22,7 @@ Thanks also to nclemeur for identifying and fixing a password issue with complex
 
 There are variants with a solid bar (see above), 5px and 8px as well as dashed bar 5px (see below) and 8px. The Data used bar is graded in colour from green to red. Also included are HD's original and Jayden's modified skin. The ABB.ini skin is the same as the 5px image one and is my current favourite skin.
 
-I also added a large font variant that is a larger meter and has different graphics. The bar style and height can be changed in the same way as the other skins.
+I also added a mid (12 point) and a large (16 point) font variant that is a larger meter and has different graphics. The bar style and height can be changed in the same way as the other skins.
 
 The only difference between these is I have edited the variable barStyleSize to select the right image or colour bar size as per the below but otherwise all of the variants are identical (except for HD and Jayden's originals of course)
 
