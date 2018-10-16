@@ -9,6 +9,8 @@ HD's and Jayden's skins are distributed in the RMSKIN file as well.
 
 Thanks also to nclemeur for identifying and fixing a password issue with complex passwords.
 
+NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
+
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
 2) Download [Aussie Broadband Usage 0.39.rmskin](/Aussie%20Broadband%20Usage%200.39.rmskin)
