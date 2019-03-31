@@ -167,7 +167,7 @@ Set objUsageJSON = parse_json(UsageJSON)
 DownVal = objUsageJSON.downloadedMb * 1000 * 1000
 UpVal = objUsageJSON.uploadedMb * 1000 * 1000
 
-If objUsageJSON.remainingMb = "" Or objUsageJSON.remainingMb Is Null Then
+If IsNull(objUsageJSON.remainingMb) Then
   ' Unlimited plan (skin uses allowance1_mb >= 100,000,000 as trigger)
   AllowanceMB = 100000000
   LeftVal = 0
