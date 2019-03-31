@@ -3,6 +3,9 @@ AussieBroadband usage meter skin for Rainmeter.
 
 BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal.
 
+## Security and Password Encryption/Encoding
+Please be aware that the password is encoded in the password file but it could easily be un-encoded by anyone who has access to your computer and knowledge. It is NOT, nor has it ever been 'encrypted'. Please just be aware anyone with physical access to your computer could decode it.
+
 Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11, Protogen and Big Kahuna on the whirlpool forums
 [Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
 [HD's ABB Original](https://www.dropbox.com/sh/rurvj80pp12lvkj/AAAI5EmF5BHDSpeezSqHJouBa)
