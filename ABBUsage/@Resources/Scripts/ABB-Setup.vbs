@@ -1,109 +1,269 @@
+'-------------------------------------------------------------------------------
+' Environment
+'-------------------------------------------------------------------------------
+
 Option Explicit
 
-Dim wInput, fs, f, shell, wAppDir, Encrypted, Key, wUserName, wPassword, wUserDetails
+'-------------------------------------------------------------------------------
+' Global variables and objects
+'-------------------------------------------------------------------------------
+
 Const ApplicationFolder = "Rainmeter-ABB"
 
-set shell = WScript.CreateObject( "WScript.Shell" )
-wAppDir = (shell.ExpandEnvironmentStrings("%APPDATA%")) & "\"& ApplicationFolder
-Set fs = CreateObject ("Scripting.FileSystemObject")
+Dim objShell, AppDir, ConfigFile, EncodedFile
+Dim objFS, fileHandle, ConfigData
+Dim Username, ServiceID, Password
+Dim objWinHTTP, SendParams, SetCookie, Cookie
+Dim AuthURL, CustURL
+Dim CustomerJSON, objCustomerJSON
+Dim ComputerName, EncodedPassword
 
-If NOT fs.FolderExists(wAppDir) Then
- fs.CreateFolder(wAppDir)
+Set objShell = CreateObject("WScript.Shell")
+
+Set objFS = CreateObject("Scripting.FileSystemObject")
+
+Set objWinHTTP = CreateObject("WinHTTP.WinHTTPRequest.5.1")
+
+ComputerName = LCase(objShell.ExpandEnvironmentStrings("%COMPUTERNAME%"))
+
+AuthURL = "https://myaussie-auth.aussiebroadband.com.au/login"
+CustURL = "https://myaussie-api.aussiebroadband.com.au/customer"
+
+'-------------------------------------------------------------------------------
+' Application folder and files
+'-------------------------------------------------------------------------------
+
+AppDir = (objShell.ExpandEnvironmentStrings("%APPDATA%")) & "\" & ApplicationFolder
+
+If Not objFS.FolderExists(AppDir) Then
+  objFS.CreateFolder(AppDir)
 End If
 
-wUserName = ""
+ConfigFile = AppDir & "\ABB-Configuration.txt"
+EncodedFile = AppDir & "\ABB-EncodedPassword.txt"
 
-If fs.FileExists(wAppDir & "\ABB-Configuration.txt") Then
-  Set f = fs.OpenTextFile(wAppDir & "\ABB-Configuration.txt")
-  wUserDetails = f.readall
-  f.close
-  
-  wUserName = parse_item (wUserDetails, "User Name =", "<<<")
-  
+'-------------------------------------------------------------------------------
+' Load existing username and service ID
+'-------------------------------------------------------------------------------
+
+Username = ""
+ServiceID = ""
+
+If objFS.FileExists(ConfigFile) Then
+  Set fileHandle = objFS.OpenTextFile(ConfigFile)
+  ConfigData = fileHandle.readall
+  fileHandle.close
+
+  Username = parse_item(ConfigData, "Username = ", "<<<")
+  ServiceID = parse_item(ConfigData, "ServiceID = ", "<<<")
 End If
 
-wUserName = InputBox("Please enter your ABB username" & vbCRLF & _
-                     "(the same as your ABB user)", "ABB Usage Setup", wUserName)
+'-------------------------------------------------------------------------------
+' Prompt for username and password
+'-------------------------------------------------------------------------------
 
-If wUserName = "" Then wScript.Quit
-                     
-wPassword = InputBox("Please enter your ABB password" & vbCRLF & _
-                     "(it is visible here but will be encrypted)", "ABB Usage Setup")
-                    
-If wPassword = "" Then wScript.Quit
+Password = ""
 
-key = LCase(shell.ExpandEnvironmentStrings("%COMPUTERNAME%"))
-Encrypted =  encrypt(wPassword)
+Username = InputBox("Please enter your ABB username" & vbCRLF & _
+                     "(the same as your ABB user)", "ABB Setup", Username)
 
-Set f = fs.CreateTextFile(wAppDir & "\ABB-Configuration.txt", True)
-f.writeline "User Name = " & wUserName & " <<< Your username"
-f.close
+If Username = "" Then WScript.Quit
 
-Set f = fs.CreateTextFile(wAppDir & "\ABB-EncrytpedPassword.txt", True)
-f.write encrypted
-f.close
+Password = InputBox("Please enter your ABB password" & vbCRLF & _
+                     "(it is visible here but will be encoded)", "ABB Setup")
 
-Function encrypt(Str)
- 
-Dim Newstr, LenStr, LenKey, x
+If Password = "" Then WScript.Quit
 
-  Newstr = ""
-  LenStr = Len(Str)
-  LenKey = Len(Key)
+MsgBox "Setup will now test your username and password" & vbCRLF & _
+       "and retrieve your NBN Service ID from the ABB portal", 64, "ABB Setup"
 
-  if Len(Key)<Len(Str) Then
-    For x = 1 to Ceiling(LenStr/LenKey)
-      Key = Key & Key
-    Next
-  End If
+'-------------------------------------------------------------------------------
+' Test login with username and password
+'-------------------------------------------------------------------------------
 
-  For x = 1 To LenStr
-    Newstr = Newstr & chr(Int(asc(Mid(str,x,1))) + Int(asc(Mid(key,x,1)))-20)
-  Next
+SendParams = "username=" & Username & "&password=" & Password
 
- encrypt = Newstr
+objWinHTTP.Open "POST", AuthURL, False
+objWinHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+objWinHTTP.send SendParams
 
-End Function
+If objWinHTTP.Status <> 200 Then
+  MsgBox "Failed to login to ABB portal (HTTP Status " & objWinHTTP.Status & ")" & vbCRLF & _
+         "Please check your username/password" & vbCRLF & _
+         "and run the ABB-Setup script again", 16, "ABB Setup"
+  WScript.Quit
+End If
 
-Private Function parse_item (ByRef contents, start_tag, end_tag)
+SetCookie = objWinHTTP.GetResponseHeader("Set-Cookie")
+Cookie = Split(SetCookie, ";")(0)
+
+If Len(SetCookie) = 0 Or Len(Cookie) = 0 Then
+  MsgBox "Failed to obtain auth cookie from ABB portal", 16, "ABB Setup"
+  WScript.Quit
+End If
+
+'-------------------------------------------------------------------------------
+' Get customer json
+'-------------------------------------------------------------------------------
+
+objWinHTTP.Open "GET", CustURL, False
+objWinHTTP.setRequestHeader "Cookie", Cookie
+objWinHTTP.send
+
+If objWinHTTP.Status <> 200 Then
+  MsgBox "Failed to obtain customer info from ABB portal (HTTP Status " & objWinHTTP.Status & ")", 16, "ABB Setup"
+  WScript.Quit
+End If
+
+CustomerJSON = objWinHTTP.ResponseText
+
+If Len(CustomerJSON) = 0 Then
+  MsgBox "Failed to obtain customer info from ABB portal (zero length)", 16, "ABB Setup"
+  WScript.Quit
+End If
+
+'-------------------------------------------------------------------------------
+' Parse customer json
+'-------------------------------------------------------------------------------
+
+Set objCustomerJSON = parse_json(CustomerJSON)
+
+ServiceID = objCustomerJSON.services.NBN.[0].service_id
+
+If Len(ServiceID) = 0 Then
+  MsgBox "Failed to obtain NBN Service ID from customer info (zero length)", 16, "ABB Setup"
+  WScript.Quit
+End If
+
+'-------------------------------------------------------------------------------
+' Save user config
+'-------------------------------------------------------------------------------
+
+Set fileHandle = objFS.CreateTextFile(ConfigFile, True)
+fileHandle.writeline "Username = " & Username & " <<< Your ABB username"
+fileHandle.writeline "ServiceID = " & ServiceID & " <<< Your ABB NBN Service ID"
+fileHandle.close
+
+'-------------------------------------------------------------------------------
+' Encode and save password
+'-------------------------------------------------------------------------------
+
+EncodedPassword = Encode(Password, ComputerName)
+
+Set fileHandle = objFS.CreateTextFile(EncodedFile, True)
+fileHandle.write EncodedPassword
+fileHandle.close
+
+MsgBox "Setup has completed successfully" & vbCRLF & vbCRLF & _
+       "(Your ABB NBN Service ID is " & ServiceID & ")", 64, "ABB Setup"
+
+'-------------------------------------------------------------------------------
+' Private Function - parse_item
+'-------------------------------------------------------------------------------
+
+Private Function parse_item(ByRef contents, start_tag, end_tag)
 
   Dim position, item
-	
-  position = InStr (1, contents, start_tag, vbTextCompare)
-  
+
+  position = InStr(1, contents, start_tag, vbTextCompare)
+
   If position > 0 Then
-  ' Trim the html information.
-    contents = mid (contents, position + len (start_tag))
-    position = InStr (1, contents, end_tag, vbTextCompare)
-		
+    contents = Mid(contents, position + Len(start_tag))
+    position = InStr(1, contents, end_tag, vbTextCompare)
+
     If position > 0 Then
-      item = mid (contents, 1, position - 1)
+      item = Mid(contents, 1, position - 1)
     Else
-      Item = ""
+      item = ""
     End If
   Else
     item = ""
   End If
 
-  parse_item = Trim(Item)
+  parse_item = Trim(item)
 
 End Function
+
+'-------------------------------------------------------------------------------
+' Function - parse_json
+'-------------------------------------------------------------------------------
+
+Function parse_json(JsonStr)
+
+  Dim objHtmlFile, pWindow
+
+  Set objHtmlFile = CreateObject("htmlfile")
+  Set pWindow = objHtmlFile.parentWindow
+
+  pWindow.execScript "var json = " & JsonStr, "JScript"
+
+  Set parse_json = pWindow.json
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Function - Encode
+'-------------------------------------------------------------------------------
+
+Function Encode(Str, SeedStr)
+
+  Dim NewStr, LenStr, LenKey, x
+
+  NewStr = ""
+  LenStr = Len(Str)
+  LenKey = Len(SeedStr)
+
+  If Len(SeedStr) < Len(Str) Then
+    For x = 1 to Ceiling(LenStr/LenKey)
+      SeedStr = SeedStr & SeedStr
+    Next
+  End If
+
+  For x = 1 To LenStr
+    NewStr = NewStr & chr(Int(asc(Mid(Str, x, 1))) + Int(asc(Mid(SeedStr, x, 1))) - 20)
+  Next
+
+  Encode = NewStr
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Private Function - Ceiling
+'-------------------------------------------------------------------------------
 
 Private Function Ceiling(byval n)
-	Dim iTmp, f
-	n = cdbl(n)
-	f = Floor(n)
-	if f = n then
-		Ceiling = n
-		Exit Function
-	End If
-	Ceiling = cInt(f + 1)
+
+  Dim fTmp
+
+  n = cdbl(n)
+  fTmp = Floor(n)
+
+  If fTmp = n Then
+    Ceiling = n
+    Exit Function
+  End If
+
+  Ceiling = cInt(fTmp + 1)
+
 End Function
 
+'-------------------------------------------------------------------------------
+' Private Function - Floor
+'-------------------------------------------------------------------------------
+
 Private Function Floor(byval n)
-	Dim iTmp
-	n = cdbl(n)
-	iTmp = Round(n)
-	if iTmp > n then iTmp = iTmp - 1
-	Floor = cInt(iTmp)
+
+  Dim rTmp
+
+  n = cdbl(n)
+  rTmp = Round(n)
+
+  If rTmp > n Then
+    rTmp = rTmp - 1
+  End If
+
+  Floor = cInt(rTmp)
+
 End Function
+
+' EOF

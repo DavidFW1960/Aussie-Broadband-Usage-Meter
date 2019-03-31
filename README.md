@@ -1,7 +1,7 @@
 # Aussie Broadband Usage Meter
 AussieBroadband usage meter skin for Rainmeter.
 
-Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11 and Big Kahuna on the whirlpool forums
+Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11, Protogen and Big Kahuna on the whirlpool forums
 [Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
 [HD's ABB Original](https://www.dropbox.com/sh/rurvj80pp12lvkj/AAAI5EmF5BHDSpeezSqHJouBa)
 [Jandakot11's ABB Modified](https://github.com/jaydenmorris1/AussieBroadband-Usage-Meter)

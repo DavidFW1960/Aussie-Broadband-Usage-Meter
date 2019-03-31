@@ -1,252 +1,360 @@
+'-------------------------------------------------------------------------------
+' Environment
+'-------------------------------------------------------------------------------
+
 Option Explicit
 
-Dim Debug, FileTracking
-Debug = false
-FileTracking = false
+'-------------------------------------------------------------------------------
+' Global variables and objects
+'-------------------------------------------------------------------------------
 
-Dim log_file, ItemCount, SkipFileCheck, UpdateStarted, UpdateTimeStamp, DayStart, WTempDir, Shell, wAppDir, wURLTemp
-Dim contents, Item, parsed_data ()
-Dim wshShell
-Dim wUsername, wPassword, wQuota, wResetDay, wProductID
-
-Const ForReading = 1, ForWriting = 2, ForAppending = 8 
 Const ApplicationFolder = "Rainmeter-ABB"
 
-log_file = "ABB"
-SkipFileCheck = False
+Dim objShell, AppDir, ConfigFile, EncodedFile
+Dim objFS, fileHandle, ConfigData
+Dim ComputerName, EncodedPassword
+Dim Username, ServiceID, Password
+Dim objWinHTTP, SendParams, SetCookie, Cookie
+Dim AuthURL, UsageURL
+Dim UsageJSON, objUsageJSON, UsageXML
+Dim DownVal, UpVal, AllowanceMB, LeftVal, LastUpdated, Rollover
+Dim Debug, FileTracking, StartTime
 
-Set shell = WScript.CreateObject( "WScript.Shell" )
-wAppDir = (shell.ExpandEnvironmentStrings("%APPDATA%")) & "\"& ApplicationFolder
-wTempDir = (shell.ExpandEnvironmentStrings("%TEMP%")) & "\"& ApplicationFolder
-Set Shell = Nothing
+Set objShell = CreateObject( "WScript.Shell")
 
-Private Function Get_Cache_Value (paramString, statfile)
-  
-  Dim fs, fp, f, fl, wshell, counter, InTime, wParam
+Set objFS = CreateObject("Scripting.FileSystemObject")
 
-  InTime = Now()
-  wParam = LCase(Replace(paramString," ",""))
+Set objWinHTTP = CreateObject("WinHTTP.WinHTTPRequest.5.1")
 
-  Set fs = CreateObject ("Scripting.FileSystemObject")
+ComputerName = LCase(objShell.ExpandEnvironmentStrings("%COMPUTERNAME%"))
 
-  If (fs.FileExists (wTempDir & "/" & statfile & ".txt")) Then
-	
-    ' Don't read the file contents while the update is running
-    Set f = fs.OpenTextFile (wTempDir & "/" & statfile & ".txt", ForReading)
-    contents = f.readall
-    f.Close
-    
-    If InStr(contents,"</endoffile>") > 0 Then
-      item = parse_item (contents, "<" & wParam & ">", "</" & wParam & ">")
-    Else
-      item = "Lock or Bad Read"
-    End If
- 
-    Set fs = Nothing
-		
-    contents = item
+AuthURL = "https://myaussie-auth.aussiebroadband.com.au/login"
+UsageURL = "https://myaussie-api.aussiebroadband.com.au/broadband/<ServiceID>/usage"
 
-  Else
-    contents = "Missing Update File - Check Updating Meter"
-  End If
+Debug = False
+FileTracking = False
 
-  Get_Cache_Value = contents
+StartTime = Now()
 
-End Function
+'-------------------------------------------------------------------------------
+' Application folder and files
+'-------------------------------------------------------------------------------
 
-Private Function Floor(byval n)
-	Dim iTmp
-	n = cdbl(n)
-	iTmp = Round(n)
-	if iTmp > n then iTmp = iTmp - 1
-	Floor = cInt(iTmp)
-End Function
+AppDir = (objShell.ExpandEnvironmentStrings("%APPDATA%")) & "\" & ApplicationFolder
 
-Function Ceiling(byval n)
-	Dim iTmp, f
-	n = cdbl(n)
-	f = Floor(n)
-	if f = n then
-		Ceiling = n
-		Exit Function
-	End If
-	Ceiling = cInt(f + 1)
-End Function
+If Not objFS.FolderExists(AppDir) Then
+  objFS.CreateFolder(AppDir)
+End If
 
-Function LastUpdate ()
-  
-  LastUpdate = Get_Cache_Value("Usage Updated", log_file)
+ConfigFile = AppDir & "\ABB-Configuration.txt"
+EncodedFile = AppDir & "\ABB-EncodedPassword.txt"
 
-End Function
+'-------------------------------------------------------------------------------
+' Run setup if required
+'-------------------------------------------------------------------------------
 
-Function UpdateStats ()
+If Not (objFS.FolderExists(AppDir) And _
+        objFS.FileExists(ConfigFile) And _
+        objFS.FileExists(EncodedFile)) Then
 
-  Dim wxml, wxmlUsage, fs, f, wURL, wSendParams, wCookie, wHeaders, InTime, wUserDetails, NewFormat, objShell, wEtag
- 
-  InTime = Now()
-  UpdateStarted = Now()
-  UpdateTimeStamp = Year(UpdateStarted) & MyLpad(Month(UpdateStarted),"0",2) & MyLpad(Day(UpdateStarted),"0",2) & "-" & MyLpad(Hour(UpdateStarted),"0",2) & MyLpad(Minute(UpdateStarted),"0",2) & MyLpad(Second(UpdateStarted),"0",2)
-  NewFormat = False
-  Set fs = CreateObject ("Scripting.FileSystemObject")
+  objShell.run("ABB-Setup.vbs")
+  WScript.Quit
+End If
 
-  If NOT (fs.FolderExists(wTempDir)) Then fs.CreateFolder(wTempDir)
+'-------------------------------------------------------------------------------
+' Load username and service ID
+'-------------------------------------------------------------------------------
 
-  If NOT (fs.FolderExists(wAppDir) AND _
-          fs.FileExists(wAppDir & "\" & log_file & "-Configuration.txt") AND _
-          fs.FileExists(wAppDir & "\" & "\" & log_file & "-EncrytpedPassword.txt")) Then
-    Set objShell = CreateObject("WScript.Shell")
-    objShell.run(log_file & "-Setup.vbs")
-    Set objShell = Nothing
-    wScript.Quit
-  End If
-  
-  Set f = fs.OpenTextFile(wAppDir & "\" & log_file & "-Configuration.txt")
-  wUserDetails = f.readall
-  f.close                                                                                                        												  
-  wUserName = parse_item (wUserDetails, "User Name =", "<<<")
-  
-  Set f = fs.OpenTextFile(wAppDir & "\" & log_file & "-EncrytpedPassword.txt")
-  wUserDetails = f.readall
-  f.close
-  wUserDetails = Decrypt(wUserDetails)
-  wUserDetails = URLEncode(wUserDetails)
-  
-  Set wxml = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+Username = ""
+ServiceID = ""
 
-  wURL = "https://my.aussiebroadband.com.au/usage.php?xml=yes"
-  
-  wSendParams="login_username=" & wUsername & "&login_password=" & wUserDetails
-  
-  wxml.Open "POST", wURL, False
+Set fileHandle = objFS.OpenTextFile(ConfigFile)
+ConfigData = fileHandle.readall
+fileHandle.close
 
-  wxml.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+Username = parse_item(ConfigData, "Username = ", "<<<")
+ServiceID = parse_item(ConfigData, "ServiceID = ", "<<<")
 
-  On Error Resume Next
-  
-  wxml.send wSendParams
+If Username = "" Or ServiceID = "" Then
+  objShell.run("ABB-Setup.vbs")
+  WScript.Quit
+End If
 
- if  Err.Number <> 0 Then   
-    RaiseException "Sign On - " & wURL, Err.Number, Err.Description
-  End If
-  
-    Set f = fs.CreateTextFile (log_file & "-Usage.txt", True)
-    f.write (wxml.ResponseText)
-    f.close
+UsageURL = Replace(UsageURL, "<ServiceID>", ServiceID)
 
+If Debug Then
+  MsgBox "UsageURL = '" & UsageURL & "'", 64, "Debug"
+End If
 
-  contents = wxml.ResponseText
-  
-  Set fs = Nothing
+'-------------------------------------------------------------------------------
+' Load and decode password
+'-------------------------------------------------------------------------------
 
-End Function
+Set fileHandle = objFS.OpenTextFile(EncodedFile)
+EncodedPassword = fileHandle.readall
+fileHandle.close
 
-Private Function parse_item (ByRef contents, start_tag, end_tag)
+Password = Decode(EncodedPassword, ComputerName)
+
+If Password = "" Then
+  objShell.run("ABB-Setup.vbs")
+  WScript.Quit
+End If
+
+'-------------------------------------------------------------------------------
+' Login with username and password and get cookie
+'-------------------------------------------------------------------------------
+
+SendParams = "username=" & Username & "&password=" & Password
+
+objWinHTTP.Open "POST", AuthURL, False
+objWinHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+
+On Error Resume Next
+
+objWinHTTP.send SendParams
+
+If Err.Number <> 0 Then
+  RaiseException "Login VB Error - " & AuthURL, Err.Number, Err.Description
+End If
+
+If objWinHTTP.Status <> 200 Then
+  RaiseException "Login HTTP Error - " & AuthURL, objWinHTTP.Status, objWinHTTP.StatusText
+End If
+
+SetCookie = objWinHTTP.GetResponseHeader("Set-Cookie")
+Cookie = Split(SetCookie, ";")(0)
+
+If Len(SetCookie) = 0 Or Len(Cookie) = 0 Then
+  RaiseException "Cookie", 999, "Failed to obtain auth cookie from ABB portal (zero length)"
+End If
+
+'-------------------------------------------------------------------------------
+' Get usage json
+'-------------------------------------------------------------------------------
+
+objWinHTTP.Open "GET", UsageURL, False
+objWinHTTP.setRequestHeader "Cookie", Cookie
+
+On Error Resume Next
+
+objWinHTTP.send
+
+If Err.Number <> 0 Then
+  RaiseException "Usage VB Error - " & UsageURL, Err.Number, Err.Description
+End If
+
+If objWinHTTP.Status <> 200 Then
+  RaiseException "Usage HTTP Error - " & UsageURL, objWinHTTP.Status, objWinHTTP.StatusText
+End If
+
+UsageJSON = objWinHTTP.ResponseText
+
+If Debug Then
+  MsgBox "UsageJSON = '" & UsageJSON & "'", 64, "Debug"
+End If
+
+If Len(UsageJSON) = 0 Then
+  RaiseException "Usage JSON String", 999, "Failed to obtain usage info from ABB portal (zero length)"
+End If
+
+'-------------------------------------------------------------------------------
+' Parse usage json
+'-------------------------------------------------------------------------------
+
+Set objUsageJSON = parse_json(UsageJSON)
+
+DownVal = objUsageJSON.downloadedMb * 1000 * 1000
+UpVal = objUsageJSON.uploadedMb * 1000 * 1000
+
+If objUsageJSON.remainingMb = "" Then
+  ' Unlimited plan (skin uses allowance1_mb >= 100,000,000 as trigger)
+  AllowanceMB = 100000000
+  LeftVal = 0
+Else
+  AllowanceMB = objUsageJSON.usedMb + objUsageJSON.remainingMb
+  LeftVal = objUsageJSON.remainingMb * 1000 * 1000
+End If
+
+LastUpdated = objUsageJSON.lastUpdated
+Rollover = Day(StartTime) - objUsageJSON.daysTotal + objUsageJSON.daysRemaining
+
+If Debug Then
+  MsgBox "DownVal = '" & DownVal & "'" & vbCRLF & _
+         "UpVal = '" & UpVal & "'" & vbCRLF & _
+         "AllowanceMB = '" & AllowanceMB & "'" & vbCRLF & _
+         "LeftVal = '" & LeftVal & "'" & vbCRLF & _
+         "LastUpdated = '" & LastUpdated & "'" & vbCRLF & _
+         "Rollover = '" & Rollover & "'", 64, "Debug"
+End If
+
+'-------------------------------------------------------------------------------
+' Create and save usage xml
+'-------------------------------------------------------------------------------
+
+UsageXML = "<usage>" & vbCRLF & _
+           "  <down1>" & DownVal & "</down1>" & vbCRLF & _
+           "  <up1>" & UpVal & "</up1>" & vbCRLF & _
+           "  <allowance1_mb>" & AllowanceMB & "</allowance1_mb>" & vbCRLF & _
+           "  <left1>" & LeftVal & "</left1>" & vbCRLF & _
+           "  <lastupdated>" & LastUpdated & "</lastupdated>" & vbCRLF & _
+           "  <rollover>" & Rollover & "</rollover>" & vbCRLF & _
+           "</usage>"
+
+If Debug Then
+  MsgBox "UsageXML = '" & UsageXML & "'", 64, "Debug"
+End If
+
+Set fileHandle = objFS.CreateTextFile("ABB-Usage.txt", True)
+fileHandle.write UsageXML
+fileHandle.close
+
+'-------------------------------------------------------------------------------
+' Private Function - parse_item
+'-------------------------------------------------------------------------------
+
+Private Function parse_item(ByRef contents, start_tag, end_tag)
 
   Dim position, item
-	
-  position = InStr (1, contents, start_tag, vbTextCompare)
-  
-  If position > 0 Then
 
-    contents = mid (contents, position + len (start_tag))
+  position = InStr(1, contents, start_tag, vbTextCompare)
+
+  If position > 0 Then
+    contents = Mid(contents, position + Len(start_tag))
     position = InStr (1, contents, end_tag, vbTextCompare)
-		
+
     If position > 0 Then
-      item = mid (contents, 1, position - 1)
+      item = Mid(contents, 1, position - 1)
     Else
-      Item = "Invalid Data"
+      item = ""
     End If
   Else
-    item = "Invalid Data"
+    item = ""
   End If
 
-  parse_item = Trim(Item)
+  parse_item = Trim(item)
 
 End Function
 
-Sub RaiseException (pErrorSection, pErrorCode, pErrorMessage)
+'-------------------------------------------------------------------------------
+' Private Function - Decode
+'-------------------------------------------------------------------------------
 
-    Dim errfs, errf, errContent
-    
-    Set errfs = CreateObject ("Scripting.FileSystemObject")
-    Set errf = errfs.CreateTextFile(log_file & "-errors.txt", True)
-    
+Function Decode(Str, SeedStr)
+
+  Dim NewStr, LenStr, LenKey, x
+
+  NewStr = ""
+  LenStr = Len(Str)
+  LenKey = Len(SeedStr)
+
+  If Len(SeedStr) < Len(Str) Then
+    For x = 1 to Ceiling(LenStr/LenKey)
+      SeedStr = SeedStr & SeedStr
+    Next
+  End If
+
+  For x = 1 To LenStr
+    NewStr = NewStr & chr(Int(asc(Mid(Str, x, 1))) + 20 - Int(asc(Mid(SeedStr, x, 1))))
+  Next
+
+  Decode = NewStr
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Private Function - Ceiling
+'-------------------------------------------------------------------------------
+
+Function Ceiling(byval n)
+
+  Dim fTmp
+
+  n = cdbl(n)
+  fTmp = Floor(n)
+
+  If fTmp = n then
+    Ceiling = n
+    Exit Function
+  End If
+
+  Ceiling = cInt(fTmp + 1)
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Private Function - Floor
+'-------------------------------------------------------------------------------
+
+Private Function Floor(byval n)
+
+  Dim rTmp
+
+  n = cdbl(n)
+  rTmp = Round(n)
+
+  If rTmp > n then
+    rTmp = rTmp - 1
+  End If
+
+  Floor = cInt(rTmp)
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Private Function - RaiseException
+'-------------------------------------------------------------------------------
+
+Sub RaiseException(pErrorSection, pErrorCode, pErrorMessage)
+
+    Dim errContent, errfs, errf
+    Dim FileTimeStamp
+
     errContent = Now() & vbCRLF & vbCRLF & _
                  pErrorSection & vbCRLF & _
                  "Error Code: " & pErrorCode & vbCRLF & _
                  "--------------------------------------" & vbCRLF & _
                  pErrorMessage
+
+    Set errfs = CreateObject("Scripting.FileSystemObject")
+
+    Set errf = errfs.CreateTextFile("ABB-errors.txt", True)
     errf.write errContent
     errf.close
-    
+
     If FileTracking Then
-      Set errf = errfs.CreateTextFile (log_file & "-errors-" & UpdateTimeStamp & ".txt", True)
+
+      FileTimeStamp = Year(StartTime) & Right("0" & Month(StartTime), 2) & Right("0" & Day(StartTime), 2) & "-" & _
+                      Right("0" & Hour(StartTime), 2) & Right("0" & Minute(StartTime), 2) & Right("0" & Second(StartTime), 2)
+
+      Set errf = errfs.CreateTextFile("ABB-errors-" & FileTimeStamp & ".txt", True)
       errf.write errContent
       errf.close
+
     End If
 
     Set errf = Nothing
-    
-    If errfs.FileExists(log_file & "-Updating.txt") Then errfs.DeleteFile(log_file & "-Updating.txt") 
-
     Set errfs = Nothing
-    
+
     WScript.Quit
 
 End Sub
 
-Function Decrypt(Str)
+'-------------------------------------------------------------------------------
+' Function - parse_json
+'-------------------------------------------------------------------------------
 
-  Dim Key, NewStr, LenStr, LenKey, wsh, x
-   
-  set wsh = WScript.CreateObject( "WScript.Shell" )
-  key = LCase(wsh.ExpandEnvironmentStrings("%COMPUTERNAME%"))
+Function parse_json(JsonStr)
 
-  Newstr = ""
-  LenStr = Len(Str)
-  LenKey = Len(Key)
+  Dim objHtmlFile, pWindow
 
-  if Len(Key)<Len(Str) Then
-    For x = 1 to Ceiling(LenStr/LenKey)
-      Key = Key & Key
-    Next
-  End If
+  Set objHtmlFile = CreateObject("htmlfile")
+  Set pWindow = objHtmlFile.parentWindow
 
-  For x = 1 To LenStr
-    Newstr = Newstr & chr(Int(asc(Mid(str,x,1))) + 20 - Int(asc(Mid(key,x,1))))
-  Next
+  pWindow.execScript "var json = " & JsonStr, "JScript"
 
- Decrypt = Newstr
+  Set parse_json = pWindow.json
 
 End Function
 
-Function URLEncode(StringToEncode)
-  Dim TempAns, CurChr, iChar
-  CurChr = 1
-  Do Until CurChr - 1 = Len(StringToEncode)
-    iChar = Asc(Mid(StringToEncode, CurChr, 1))
-    If (iChar > 47 And iChar < 58)  Or (iChar > 64 And iChar < 91) Or (iChar > 96 And iChar < 123) Then
-      TempAns = TempAns & Mid(StringToEncode, CurChr, 1)
-    ElseIf iChar = 32 Then
-      TempAns = TempAns & "%" & Hex(32)      
-    Else
-      TempAns = TempAns & "%" & Right("00" & Hex(Asc(Mid(StringToEncode, CurChr, 1))), 2)
-    End If
-    CurChr = CurChr + 1
-  Loop
-  URLEncode = TempAns
-End Function
-
-Function MyLPad (MyValue, MyPadChar, MyPaddedLength) 
-  MyLpad = String(MyPaddedLength - Len(MyValue), MyPadChar) & MyValue 
-End Function
-
-Dim fs, f, wResponse
-Dim wRegExp, wMeasureDefs, GenerateMeasureSection, wMeasureIdx
-    
-wResponse = UpdateStats()
-   
-If wResponse = "Fetch Failed" Then RaiseException "Fetch", "ERR", "Check Setup"
-    
-GenerateMeasureSection = False
-
+' EOF
