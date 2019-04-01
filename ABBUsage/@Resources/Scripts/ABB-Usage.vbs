@@ -16,8 +16,8 @@ Dim ComputerName, EncodedPassword
 Dim Username, ServiceID, Password
 Dim objWinHTTP, SendParams, SetCookie, Cookie
 Dim AuthURL, UsageURL
-Dim UsageJSON, objUsageJSON, UsageXML
-Dim DownVal, UpVal, AllowanceMB, LeftVal, LastUpdated, Rollover
+Dim UsageJson, objUsageJson, UsageXML
+Dim DownVal, UpVal, AllowanceMB, LeftVal, LastUpdated, DaysRemaining, RolloverDay
 Dim Debug, FileTracking, StartTime
 
 Set objShell = CreateObject( "WScript.Shell")
@@ -72,8 +72,8 @@ Set fileHandle = objFS.OpenTextFile(ConfigFile)
 ConfigData = fileHandle.readall
 fileHandle.close
 
-Username = parse_item(ConfigData, "Username = ", "<<<")
-ServiceID = parse_item(ConfigData, "ServiceID = ", "<<<")
+Username = ParseItem(ConfigData, "Username = ", "<<<")
+ServiceID = ParseItem(ConfigData, "ServiceID = ", "<<<")
 
 If Username = "" Or ServiceID = "" Then
   objShell.run("ABB-Setup.vbs")
@@ -105,7 +105,7 @@ End If
 ' Login with username and password and get cookie
 '-------------------------------------------------------------------------------
 
-SendParams = "username=" & Username & "&password=" & Password
+SendParams = "username=" & Username & "&password=" & PercentEncode(Password)
 
 objWinHTTP.Open "POST", AuthURL, False
 objWinHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
@@ -148,36 +148,42 @@ If objWinHTTP.Status <> 200 Then
   RaiseException "Usage HTTP Error - " & UsageURL, objWinHTTP.Status, objWinHTTP.StatusText
 End If
 
-UsageJSON = objWinHTTP.ResponseText
+UsageJson = objWinHTTP.ResponseText
 
 If Debug Then
-  MsgBox "UsageJSON = '" & UsageJSON & "'", 64, "Debug"
+  MsgBox "UsageJson = '" & UsageJson & "'", 64, "Debug"
 End If
 
-If Len(UsageJSON) = 0 Then
+If Len(UsageJson) = 0 Then
   RaiseException "Usage JSON String", 999, "Failed to obtain usage info from ABB portal (zero length)"
 End If
+
+Set fileHandle = objFS.CreateTextFile("ABB-Usage.json", True)
+fileHandle.write UsageJson
+fileHandle.close
 
 '-------------------------------------------------------------------------------
 ' Parse usage json
 '-------------------------------------------------------------------------------
 
-Set objUsageJSON = parse_json(UsageJSON)
+Set objUsageJson = ParseJson(UsageJson)
 
-DownVal = objUsageJSON.downloadedMb * 1000 * 1000
-UpVal = objUsageJSON.uploadedMb * 1000 * 1000
+DownVal = objUsageJson.downloadedMb * 1000 * 1000
+UpVal = objUsageJson.uploadedMb * 1000 * 1000
 
-If IsNull(objUsageJSON.remainingMb) Then
+If IsNull(objUsageJson.remainingMb) Then
   ' Unlimited plan (skin uses allowance1_mb >= 100,000,000 as trigger)
   AllowanceMB = 100000000
   LeftVal = 0
 Else
-  AllowanceMB = objUsageJSON.usedMb + objUsageJSON.remainingMb
-  LeftVal = objUsageJSON.remainingMb * 1000 * 1000
+  AllowanceMB = objUsageJson.usedMb + objUsageJson.remainingMb
+  LeftVal = objUsageJson.remainingMb * 1000 * 1000
 End If
 
-LastUpdated = objUsageJSON.lastUpdated
-Rollover = Day(StartTime) - objUsageJSON.daysTotal + objUsageJSON.daysRemaining
+LastUpdated = objUsageJson.lastUpdated
+DaysRemaining = objUsageJson.daysRemaining
+
+RolloverDay = Day(DateAdd("d", DaysRemaining, LastUpdated))
 
 If Debug Then
   MsgBox "DownVal = '" & DownVal & "'" & vbCRLF & _
@@ -185,7 +191,8 @@ If Debug Then
          "AllowanceMB = '" & AllowanceMB & "'" & vbCRLF & _
          "LeftVal = '" & LeftVal & "'" & vbCRLF & _
          "LastUpdated = '" & LastUpdated & "'" & vbCRLF & _
-         "Rollover = '" & Rollover & "'", 64, "Debug"
+         "DaysRemaining = '" & DaysRemaining & "'" & vbCRLF & _
+         "RolloverDay = '" & RolloverDay & "'", 64, "Debug"
 End If
 
 '-------------------------------------------------------------------------------
@@ -198,7 +205,7 @@ UsageXML = "<usage>" & vbCRLF & _
            "  <allowance1_mb>" & AllowanceMB & "</allowance1_mb>" & vbCRLF & _
            "  <left1>" & LeftVal & "</left1>" & vbCRLF & _
            "  <lastupdated>" & LastUpdated & "</lastupdated>" & vbCRLF & _
-           "  <rollover>" & Rollover & "</rollover>" & vbCRLF & _
+           "  <rollover>" & RolloverDay & "</rollover>" & vbCRLF & _
            "</usage>"
 
 If Debug Then
@@ -210,18 +217,18 @@ fileHandle.write UsageXML
 fileHandle.close
 
 '-------------------------------------------------------------------------------
-' Private Function - parse_item
+' Private Function - ParseItem
 '-------------------------------------------------------------------------------
 
-Private Function parse_item(ByRef contents, start_tag, end_tag)
+Private Function ParseItem(ByRef contents, startTag, endTag)
 
   Dim position, item
 
-  position = InStr(1, contents, start_tag, vbTextCompare)
+  position = InStr(1, contents, startTag, vbTextCompare)
 
   If position > 0 Then
-    contents = Mid(contents, position + Len(start_tag))
-    position = InStr (1, contents, end_tag, vbTextCompare)
+    contents = Mid(contents, position + Len(startTag))
+    position = InStr (1, contents, endTag, vbTextCompare)
 
     If position > 0 Then
       item = Mid(contents, 1, position - 1)
@@ -232,12 +239,12 @@ Private Function parse_item(ByRef contents, start_tag, end_tag)
     item = ""
   End If
 
-  parse_item = Trim(item)
+  ParseItem = Trim(item)
 
 End Function
 
 '-------------------------------------------------------------------------------
-' Private Function - Decode
+' Function - Decode
 '-------------------------------------------------------------------------------
 
 Function Decode(Str, SeedStr)
@@ -263,7 +270,7 @@ Function Decode(Str, SeedStr)
 End Function
 
 '-------------------------------------------------------------------------------
-' Private Function - Ceiling
+' Function - Ceiling
 '-------------------------------------------------------------------------------
 
 Function Ceiling(byval n)
@@ -302,7 +309,38 @@ Private Function Floor(byval n)
 End Function
 
 '-------------------------------------------------------------------------------
-' Private Function - RaiseException
+' Function - PercentEncode
+'-------------------------------------------------------------------------------
+
+Function PercentEncode(stringToEncode)
+
+  Dim encodedStr, i, currentChar, ansiVal
+
+  encodedStr = ""
+
+  For i = 1 to Len(stringToEncode)
+
+    currentChar = Mid(stringToEncode, i, 1)
+    ansiVal = Asc(currentChar)
+
+    ' Numbers or uppercase letters or lowercase letters - do not encode
+    If (ansiVal >= 48 And ansiVal <= 57) Or (ansiVal >= 65 And ansiVal <= 90) Or (ansiVal >= 97 And ansiVal <= 122) Then
+      encodedStr = encodedStr & currentChar
+
+    ' Everything else - encode
+    Else
+      encodedStr = encodedStr & "%" & Right("00" & Hex(ansiVal), 2)
+
+    End If
+
+  Next
+
+  PercentEncode = encodedStr
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Sub - RaiseException
 '-------------------------------------------------------------------------------
 
 Sub RaiseException(pErrorSection, pErrorCode, pErrorMessage)
@@ -341,10 +379,10 @@ Sub RaiseException(pErrorSection, pErrorCode, pErrorMessage)
 End Sub
 
 '-------------------------------------------------------------------------------
-' Function - parse_json
+' Function - ParseJson
 '-------------------------------------------------------------------------------
 
-Function parse_json(JsonStr)
+Function ParseJson(JsonStr)
 
   Dim objHtmlFile, pWindow
 
@@ -353,7 +391,7 @@ Function parse_json(JsonStr)
 
   pWindow.execScript "var json = " & JsonStr, "JScript"
 
-  Set parse_json = pWindow.json
+  Set ParseJson = pWindow.json
 
 End Function
 

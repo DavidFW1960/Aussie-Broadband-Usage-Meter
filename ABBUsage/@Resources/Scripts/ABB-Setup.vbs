@@ -54,8 +54,8 @@ If objFS.FileExists(ConfigFile) Then
   ConfigData = fileHandle.readall
   fileHandle.close
 
-  Username = parse_item(ConfigData, "Username = ", "<<<")
-  ServiceID = parse_item(ConfigData, "ServiceID = ", "<<<")
+  Username = ParseItem(ConfigData, "Username = ", "<<<")
+  ServiceID = ParseItem(ConfigData, "ServiceID = ", "<<<")
 End If
 
 '-------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ MsgBox "Setup will now test your username and password" & vbCRLF & _
 ' Test login with username and password
 '-------------------------------------------------------------------------------
 
-SendParams = "username=" & Username & "&password=" & Password
+SendParams = "username=" & Username & "&password=" & PercentEncode(Password)
 
 objWinHTTP.Open "POST", AuthURL, False
 objWinHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
@@ -126,7 +126,7 @@ End If
 ' Parse customer json
 '-------------------------------------------------------------------------------
 
-Set objCustomerJSON = parse_json(CustomerJSON)
+Set objCustomerJSON = ParseJson(CustomerJSON)
 
 ServiceID = objCustomerJSON.services.NBN.[0].service_id
 
@@ -155,21 +155,21 @@ fileHandle.write EncodedPassword
 fileHandle.close
 
 MsgBox "Setup has completed successfully" & vbCRLF & vbCRLF & _
-       "(Your ABB NBN Service ID is " & ServiceID & ")", 64, "ABB Setup"
+       "(FYI your ABB NBN Service ID is " & ServiceID & ")", 64, "ABB Setup"
 
 '-------------------------------------------------------------------------------
-' Private Function - parse_item
+' Private Function - ParseItem
 '-------------------------------------------------------------------------------
 
-Private Function parse_item(ByRef contents, start_tag, end_tag)
+Private Function ParseItem(ByRef contents, startTag, endTag)
 
   Dim position, item
 
-  position = InStr(1, contents, start_tag, vbTextCompare)
+  position = InStr(1, contents, startTag, vbTextCompare)
 
   If position > 0 Then
-    contents = Mid(contents, position + Len(start_tag))
-    position = InStr(1, contents, end_tag, vbTextCompare)
+    contents = Mid(contents, position + Len(startTag))
+    position = InStr(1, contents, endTag, vbTextCompare)
 
     If position > 0 Then
       item = Mid(contents, 1, position - 1)
@@ -180,15 +180,46 @@ Private Function parse_item(ByRef contents, start_tag, end_tag)
     item = ""
   End If
 
-  parse_item = Trim(item)
+  ParseItem = Trim(item)
 
 End Function
 
 '-------------------------------------------------------------------------------
-' Function - parse_json
+' Function - PercentEncode
 '-------------------------------------------------------------------------------
 
-Function parse_json(JsonStr)
+Function PercentEncode(stringToEncode)
+
+  Dim encodedStr, i, currentChar, ansiVal
+
+  encodedStr = ""
+
+  For i = 1 to Len(stringToEncode)
+
+    currentChar = Mid(stringToEncode, i, 1)
+    ansiVal = Asc(currentChar)
+
+    ' Numbers or uppercase letters or lowercase letters - do not encode
+    If (ansiVal >= 48 And ansiVal <= 57) Or (ansiVal >= 65 And ansiVal <= 90) Or (ansiVal >= 97 And ansiVal <= 122) Then
+      encodedStr = encodedStr & currentChar
+
+    ' Everything else - encode
+    Else
+      encodedStr = encodedStr & "%" & Right("00" & Hex(ansiVal), 2)
+
+    End If
+
+  Next
+
+  PercentEncode = encodedStr
+
+End Function
+
+'-------------------------------------------------------------------------------
+' Function - ParseJson
+'-------------------------------------------------------------------------------
+
+Function ParseJson(JsonStr)
 
   Dim objHtmlFile, pWindow
 
@@ -197,7 +228,7 @@ Function parse_json(JsonStr)
 
   pWindow.execScript "var json = " & JsonStr, "JScript"
 
-  Set parse_json = pWindow.json
+  Set ParseJson = pWindow.json
 
 End Function
 
