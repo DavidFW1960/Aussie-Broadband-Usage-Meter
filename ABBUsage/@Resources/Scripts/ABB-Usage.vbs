@@ -61,7 +61,7 @@ LoadConfig()
 CookieExpiryDays = DateDiff("d", Now(), CookieExpiry)
 HalfWayDays = Int(ExpiresIn / (60 * 60 * 24 * 2))
 
-If CookieExpiryDays < 366 Then
+If CookieExpiryDays < HalfWayDays Then
   RefreshCookie()
 End If
 
