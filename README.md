@@ -3,6 +3,9 @@ AussieBroadband usage meter skin for Rainmeter.
 
 BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal.
 
+## Changelog
+0.71 Sunday 14th April 2019 Remove debug and restore refresh token to 1/2 cookie life.
+
 ## New in version 0.70
 We are now using the new Aussie Broadband Portal which uses a cookie and a refresh token to download usage once you have authenticated. The cookie is valid for 1 year. The first time you open the new skin, you will be required to enter your ABB Username and Password to authenticate. This will then download a cookie and refresh token from ABB. When the cookie is at it's half life, the script will automatically use the refresh token to get a new cookie and refresh token. You will also be prompted to enter a description for your service. This description and service ID will be shown on the skin. This is also to facilitate an upcoming change in mid May to allow multiple services to be monitored.
 
@@ -22,7 +25,7 @@ NOTE: Some users have problems with default secure protocols (I've had reports f
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
-2) Download [Aussie Broadband Usage 0.70.rmskin](/Aussie%20Broadband%20Usage%200.70.rmskin)
+2) Download [Aussie Broadband Usage 0.71.rmskin](/Aussie%20Broadband%20Usage%200.71.rmskin)
 3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be prompted for your Aussie Broadband login details that will be encrypted and stored locally.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
