@@ -4,30 +4,41 @@
 
 Option Explicit
 
+IncludeScript("ABB-Common.vbs")
+
 '-------------------------------------------------------------------------------
 ' Global variables and objects
 '-------------------------------------------------------------------------------
 
 Const ApplicationFolder = "Rainmeter-ABB"
 
-Dim objShell, AppDir, ConfigFile, EncodedFile
-Dim objFS, fileHandle, ConfigData
-Dim Username, ServiceID, Password
-Dim objWinHTTP, SendParams, SetCookie, Cookie
-Dim AuthURL, CustURL
-Dim CustomerJSON, objCustomerJSON
-Dim ComputerName, EncodedPassword
+Dim objShell, AppDir, objFS, AuthFile, ServiceFile
+Dim AuthURL, CustURL, Username, Password
+Dim SendParams, objWinHTTP, Cookie, RefreshToken
+Dim objCustomerJson, MaxServiceNameLen, Service(2)
 
 Set objShell = CreateObject("WScript.Shell")
 
 Set objFS = CreateObject("Scripting.FileSystemObject")
 
-Set objWinHTTP = CreateObject("WinHTTP.WinHTTPRequest.5.1")
-
-ComputerName = LCase(objShell.ExpandEnvironmentStrings("%COMPUTERNAME%"))
-
 AuthURL = "https://myaussie-auth.aussiebroadband.com.au/login"
 CustURL = "https://myaussie-api.aussiebroadband.com.au/customer"
+
+'-------------------------------------------------------------------------------
+' Prompt for username and password
+'-------------------------------------------------------------------------------
+
+Username = InputBox("Please enter your ABB portal username", "ABB Setup")
+
+If Username = "" Then WScript.Quit
+
+Password = InputBox("Please enter your ABB portal password" & vbCRLF & _
+                    "(It will not be saved or stored)", "ABB Setup")
+
+If Password = "" Then WScript.Quit
+
+MsgBox "Setup will now test your username and password" & vbCRLF & _
+       "and get your NBN Service ID from the ABB portal", 64, "ABB Setup"
 
 '-------------------------------------------------------------------------------
 ' Application folder and files
@@ -35,266 +46,87 @@ CustURL = "https://myaussie-api.aussiebroadband.com.au/customer"
 
 AppDir = (objShell.ExpandEnvironmentStrings("%APPDATA%")) & "\" & ApplicationFolder
 
+If objFS.FolderExists(AppDir) Then
+  objFS.DeleteFolder(AppDir)
+End If
+
 If Not objFS.FolderExists(AppDir) Then
   objFS.CreateFolder(AppDir)
 End If
 
-ConfigFile = AppDir & "\ABB-Configuration.txt"
-EncodedFile = AppDir & "\ABB-EncodedPassword.txt"
-
-'-------------------------------------------------------------------------------
-' Load existing username and service ID
-'-------------------------------------------------------------------------------
-
-Username = ""
-ServiceID = ""
-
-If objFS.FileExists(ConfigFile) Then
-  Set fileHandle = objFS.OpenTextFile(ConfigFile)
-  ConfigData = fileHandle.readall
-  fileHandle.close
-
-  Username = ParseItem(ConfigData, "Username = ", "<<<")
-  ServiceID = ParseItem(ConfigData, "ServiceID = ", "<<<")
-End If
-
-'-------------------------------------------------------------------------------
-' Prompt for username and password
-'-------------------------------------------------------------------------------
-
-Password = ""
-
-Username = InputBox("Please enter your ABB username" & vbCRLF & _
-                     "(the same as your ABB user)", "ABB Setup", Username)
-
-If Username = "" Then WScript.Quit
-
-Password = InputBox("Please enter your ABB password" & vbCRLF & _
-                     "(it is visible here but will be encoded)", "ABB Setup")
-
-If Password = "" Then WScript.Quit
-
-MsgBox "Setup will now test your username and password" & vbCRLF & _
-       "and retrieve your NBN Service ID from the ABB portal", 64, "ABB Setup"
+AuthFile = AppDir & "\ABB-Auth.json"
+ServiceFile = AppDir & "\ABB-Service.json"
 
 '-------------------------------------------------------------------------------
 ' Test login with username and password
 '-------------------------------------------------------------------------------
 
-SendParams = "username=" & Username & "&password=" & PercentEncode(Password)
+SendParams = "username=" & UrlPercentEncode(Username) & "&password=" & UrlPercentEncode(Password)
 
-objWinHTTP.Open "POST", AuthURL, False
-objWinHTTP.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
-objWinHTTP.send SendParams
-
-If objWinHTTP.Status <> 200 Then
-  MsgBox "Failed to login to ABB portal (HTTP Status " & objWinHTTP.Status & ")" & vbCRLF & _
-         "Please check your username/password" & vbCRLF & _
-         "and run the ABB-Setup script again", 16, "ABB Setup"
-  WScript.Quit
-End If
-
-SetCookie = objWinHTTP.GetResponseHeader("Set-Cookie")
-Cookie = Split(SetCookie, ";")(0)
-
-If Len(SetCookie) = 0 Or Len(Cookie) = 0 Then
-  MsgBox "Failed to obtain auth cookie from ABB portal", 16, "ABB Setup"
-  WScript.Quit
-End If
+Set objWinHTTP = HTTPRequest("POST", AuthURL, "", SendParams, "ABB Setup")
 
 '-------------------------------------------------------------------------------
-' Get customer json
+' Get the cookie and refresh token
 '-------------------------------------------------------------------------------
 
-objWinHTTP.Open "GET", CustURL, False
-objWinHTTP.setRequestHeader "Cookie", Cookie
-objWinHTTP.send
+Cookie = GetCookie(objWinHTTP.GetResponseHeader("Set-Cookie"), "ABB Setup")
 
-If objWinHTTP.Status <> 200 Then
-  MsgBox "Failed to obtain customer info from ABB portal (HTTP Status " & objWinHTTP.Status & ")", 16, "ABB Setup"
-  WScript.Quit
-End If
-
-CustomerJSON = objWinHTTP.ResponseText
-
-If Len(CustomerJSON) = 0 Then
-  MsgBox "Failed to obtain customer info from ABB portal (zero length)", 16, "ABB Setup"
-  WScript.Quit
-End If
+RefreshToken = GetRefreshToken(objWinHTTP.ResponseText, "ABB Setup")
 
 '-------------------------------------------------------------------------------
-' Parse customer json
+' Get the Service ID
 '-------------------------------------------------------------------------------
 
-Set objCustomerJSON = ParseJson(CustomerJSON)
+Set objWinHTTP = HTTPRequest("GET", CustURL, Cookie(0), "", "ABB Setup")
 
-ServiceID = objCustomerJSON.services.NBN.[0].service_id
+Set objCustomerJson = ParseJson(objWinHTTP.ResponseText)
 
-If Len(ServiceID) = 0 Then
+Service(0) = objCustomerJson.services.NBN.[0].service_id
+
+If Len(Service(0)) = 0 Then
   MsgBox "Failed to obtain NBN Service ID from customer info (zero length)", 16, "ABB Setup"
   WScript.Quit
 End If
 
 '-------------------------------------------------------------------------------
-' Save user config
+' Prompt for Service name
 '-------------------------------------------------------------------------------
 
-Set fileHandle = objFS.CreateTextFile(ConfigFile, True)
-fileHandle.writeline "Username = " & Username & " <<< Your ABB username"
-fileHandle.writeline "ServiceID = " & ServiceID & " <<< Your ABB NBN Service ID"
-fileHandle.close
+MaxServiceNameLen = 16 - Len(Service(0))
+
+Service(1) = InputBox("Your ABB NBN Service ID is " & Service(0) & vbCRLF & _
+                      "Please enter a name for this service" & vbCRLF & _
+                      "(i.e 'Home', 'Work', etc; Max " & MaxServiceNameLen & " chars)", "ABB Setup")
+
+If Service(1) = "" Then
+  Service(1) = Service(0)
+Else
+  Service(1) = Left(Service(1), MaxServiceNameLen)
+End If
 
 '-------------------------------------------------------------------------------
-' Encode and save password
+' Save the config
 '-------------------------------------------------------------------------------
 
-EncodedPassword = Encode(Password, ComputerName)
+SaveConfig Cookie, RefreshToken, AuthFile, Service, ServiceFile
 
-Set fileHandle = objFS.CreateTextFile(EncodedFile, True)
-fileHandle.write EncodedPassword
-fileHandle.close
-
-MsgBox "Setup has completed successfully" & vbCRLF & vbCRLF & _
-       "(FYI your ABB NBN Service ID is " & ServiceID & ")", 64, "ABB Setup"
+MsgBox "Setup has completed successfully", 64, "ABB Setup"
 
 '-------------------------------------------------------------------------------
-' Private Function - ParseItem
+' Sub - IncludeScript
 '-------------------------------------------------------------------------------
 
-Private Function ParseItem(ByRef contents, startTag, endTag)
+Sub IncludeScript(strFilename)
 
-  Dim position, item
+  Dim objFS, objTextFile
 
-  position = InStr(1, contents, startTag, vbTextCompare)
+  Set objFS = CreateObject("Scripting.FileSystemObject")
+  Set objTextFile = objFS.OpenTextFile(strFilename, 1)
 
-  If position > 0 Then
-    contents = Mid(contents, position + Len(startTag))
-    position = InStr(1, contents, endTag, vbTextCompare)
+  ExecuteGlobal objTextFile.ReadAll
 
-    If position > 0 Then
-      item = Mid(contents, 1, position - 1)
-    Else
-      item = ""
-    End If
-  Else
-    item = ""
-  End If
+  objTextFile.Close
 
-  ParseItem = Trim(item)
-
-End Function
-
-'-------------------------------------------------------------------------------
-' Function - PercentEncode
-'-------------------------------------------------------------------------------
-
-Function PercentEncode(stringToEncode)
-
-  Dim encodedStr, i, currentChar, ansiVal
-
-  encodedStr = ""
-
-  For i = 1 to Len(stringToEncode)
-
-    currentChar = Mid(stringToEncode, i, 1)
-    ansiVal = Asc(currentChar)
-
-    ' Numbers or uppercase letters or lowercase letters - do not encode
-    If (ansiVal >= 48 And ansiVal <= 57) Or (ansiVal >= 65 And ansiVal <= 90) Or (ansiVal >= 97 And ansiVal <= 122) Then
-      encodedStr = encodedStr & currentChar
-
-    ' Everything else - encode
-    Else
-      encodedStr = encodedStr & "%" & Right("00" & Hex(ansiVal), 2)
-
-    End If
-
-  Next
-
-  PercentEncode = encodedStr
-
-End Function
-
-'-------------------------------------------------------------------------------
-' Function - ParseJson
-'-------------------------------------------------------------------------------
-
-Function ParseJson(JsonStr)
-
-  Dim objHtmlFile, pWindow
-
-  Set objHtmlFile = CreateObject("htmlfile")
-  Set pWindow = objHtmlFile.parentWindow
-
-  pWindow.execScript "var json = " & JsonStr, "JScript"
-
-  Set ParseJson = pWindow.json
-
-End Function
-
-'-------------------------------------------------------------------------------
-' Function - Encode
-'-------------------------------------------------------------------------------
-
-Function Encode(Str, SeedStr)
-
-  Dim NewStr, LenStr, LenKey, x
-
-  NewStr = ""
-  LenStr = Len(Str)
-  LenKey = Len(SeedStr)
-
-  If Len(SeedStr) < Len(Str) Then
-    For x = 1 to Ceiling(LenStr/LenKey)
-      SeedStr = SeedStr & SeedStr
-    Next
-  End If
-
-  For x = 1 To LenStr
-    NewStr = NewStr & chr(Int(asc(Mid(Str, x, 1))) + Int(asc(Mid(SeedStr, x, 1))) - 20)
-  Next
-
-  Encode = NewStr
-
-End Function
-
-'-------------------------------------------------------------------------------
-' Private Function - Ceiling
-'-------------------------------------------------------------------------------
-
-Private Function Ceiling(byval n)
-
-  Dim fTmp
-
-  n = cdbl(n)
-  fTmp = Floor(n)
-
-  If fTmp = n Then
-    Ceiling = n
-    Exit Function
-  End If
-
-  Ceiling = cInt(fTmp + 1)
-
-End Function
-
-'-------------------------------------------------------------------------------
-' Private Function - Floor
-'-------------------------------------------------------------------------------
-
-Private Function Floor(byval n)
-
-  Dim rTmp
-
-  n = cdbl(n)
-  rTmp = Round(n)
-
-  If rTmp > n Then
-    rTmp = rTmp - 1
-  End If
-
-  Floor = cInt(rTmp)
-
-End Function
+End Sub
 
 ' EOF
