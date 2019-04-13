@@ -3,9 +3,13 @@ AussieBroadband usage meter skin for Rainmeter.
 
 BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal.
 
-## Security and Password Encryption/Encoding
-Please be aware that the password is encoded in the password file but it could easily be un-encoded by anyone who has access to your computer and knowledge. It is NOT, nor has it ever been 'encrypted'. Please just be aware anyone with physical access to your computer could decode it.
+## New in version 0.70
+We are now using the new Aussie Broadband Portal which uses a cookie and a refresh token to download usage once you have authenticated. The cookie is valid for 1 year. The first time you open the new skin, you will be required to enter your ABB Username and Password to authenticate. This will then download a cookie and refresh token from ABB. When the cookie is at it's half life, the script will automatically use the refresh token to get a new cookie and refresh token. You will also be prompted to enter a description for your service. This description and service ID will be shown on the skin. This is also to facilitate an upcoming change in mid May to allow multiple services to be monitored.
 
+## Security and Password Encryption/Encoding
+The Username and Password are no longer stored as we obtain a cookie and refresh token as per the above. IF you change your password, the credentials will be invalidated and you will be prompted to gothrough the initial setup again.
+
+## Credits and information
 Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11, Protogen and Big Kahuna on the whirlpool forums
 [Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
 [HD's ABB Original](https://www.dropbox.com/sh/rurvj80pp12lvkj/AAAI5EmF5BHDSpeezSqHJouBa)
