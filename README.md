@@ -14,12 +14,15 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 
 ## Credits and information
 Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11, Protogen and Big Kahuna on the whirlpool forums
-[Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
+Original Inspiration: [Kanine's Bigpond Skin](http://sourceforge.net/projects/bigpond/)
+
 [HD's ABB Original](https://www.dropbox.com/sh/rurvj80pp12lvkj/AAAI5EmF5BHDSpeezSqHJouBa)
+
 [Jandakot11's ABB Modified](https://github.com/jaydenmorris1/AussieBroadband-Usage-Meter)
+
 HD's and Jayden's skins are distributed in the RMSKIN file as well.
 
-Thanks also to nclemeur for identifying and fixing a password issue with complex passwords.
+Thanks also to nclemeur for identifying and fixing a password issue with complex passwords. (Original ABB Portal)
 
 NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
 
