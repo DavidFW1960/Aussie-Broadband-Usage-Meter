@@ -1,17 +1,6 @@
 # Aussie Broadband Usage Meter
 AussieBroadband usage meter skin for Rainmeter.
 
-BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal.
-
-## Changelog
-0.71 Sunday 14th April 2019 Remove debug and restore refresh token to 1/2 cookie life.
-
-## New in version 0.70
-We are now using the new Aussie Broadband Portal which uses a cookie and a refresh token to download usage once you have authenticated. The cookie is valid for 1 year. The first time you open the new skin, you will be required to enter your ABB Username and Password to authenticate. This will then download a cookie and refresh token from ABB. When the cookie is at it's half life, the script will automatically use the refresh token to get a new cookie and refresh token. You will also be prompted to enter a description for your service. This description and service ID will be shown on the skin. This is also to facilitate an upcoming change in mid May to allow multiple services to be monitored.
-
-## Security and Password Encryption/Encoding
-The Username and Password are no longer stored as we obtain a cookie and refresh token as per the above. IF you change your password, the credentials will be invalidated and you will be prompted to gothrough the initial setup again.
-
 ## Credits and information
 Originally made by Kanine and adapted for Aussie Broadband by HD, jandakot11, Protogen and Big Kahuna on the whirlpool forums
 
@@ -25,7 +14,7 @@ HD's and Jayden's skins are distributed in the RMSKIN file as well.
 
 Thanks also to nclemeur for identifying and fixing a password issue with complex passwords. (Original ABB Portal)
 
-NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
+BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal.
 
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
@@ -37,6 +26,7 @@ NOTE: Some users have problems with default secure protocols (I've had reports f
 ![ABB Skin Solid Bar](abb-solid.png)
 
 4) There will be seven .ini skin files:
+To change colours and other options, see the notes below for version 0.34 Or just use one of these 7 provided skins.
 
 There are variants with a solid bar (see above), 5px and 8px as well as dashed bar 5px (see below) and 8px. The Data used bar is graded in colour from green to red. Also included are HD's original and Jayden's modified skin. The ABB.ini skin is the same as the 5px image one and is my current favourite skin.
 
@@ -67,7 +57,18 @@ Note that if you set the nominalAllowance to 100000 it imitates an unlimited pla
 
 Unlimited plans don't show the lower data percent used bar and don't show any of the allowance statistics in the tooltip. Set the nominalAllowance to 100000 to see this if you are not on an umlimited plan.
 
-#######MAJOR CHANGES 0.34#######
+NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
+
+## Security and Password Encryption/Encoding
+The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to gothrough the initial setup again.
+
+## Changelog
+0.71 Sunday 14th April 2019 Remove debug and restore refresh token to 1/2 cookie life.
+
+## New in version 0.70
+We are now using the new Aussie Broadband Portal which uses a cookie and a refresh token to download usage once you have authenticated. The cookie is valid for 1 year. The first time you open the new skin, you will be required to enter your ABB Username and Password to authenticate. This will then download a cookie and refresh token from ABB. When the cookie is at it's half life, the script will automatically use the refresh token to get a new cookie and refresh token. You will also be prompted to enter a description for your service. This description and service ID will be shown on the skin. This is also to facilitate an upcoming change in mid May to allow multiple services to be monitored.
+
+## New in version 0.34
 
 So I made some major changes in this version. I have moved all the colours and images from being scattered in the .ini file to now all being specified in the variables section. If you edit the abb.ini file (or any of the others except HD's and Jayden's) scroll down to line 21. It looks like this:
 
@@ -98,6 +99,8 @@ Here, you can set the bar colours for a solid bar for Days remaining, Data Used 
 Also if using an image, you can define what image to use here. If you create your own, make sure they are 183px wide and either 5px or 8px high.
 
 Another change is that if you are on an umlimited plan, the data used meter will not show unless you manually overide the allowance by specifying nominalAllowance=1000 (say) as per above. Note to 'simulate' an unlimited plan in the meter, Aussie Broadband sets a data allowance of 100000 for unlimited plans so if you enter that as the nominalAllowance, the skin will switch to an unlimited plan and show as unlimited. To use the ABB allowance as defined by ABB, just set the nominalAllowance to 0.
+
+On unlimited plans, a tooltip calculates an extimate of usage projected to the end of the cycle.
 
 I am also calculating a Quota Remaining Today number in the tooltip so you know how much quota you can still use for the rest of today and not go into the red zone.
 
