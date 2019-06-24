@@ -38,7 +38,7 @@ You will then see a message about obtaining an authentication cookie from Aussie
 
 Next you will be prompted for some display options for the skin. If you are using multiple skins, you can have different options set for each skin! Enter a number between 1 and 4 to set the style required. (You can edit this later if you wish - see below)
 
-[Select Bar Style & Size](bar_style_size.pbg)
+[Select Bar Style & Size](bar_style_size.png)
 
 Next you will be prompted for the font size - enter a number between 1 and 3. The font size selected will also set the size of the usage meter. (Again, you can edit this later if you want to, see instructions below)
 
@@ -56,7 +56,7 @@ You will now most likely see a blank box like this:
 
 ![Blank Usage](blank.png)
 
-Simply right click on the box and select Rfresh Skin and you should see data flowing in.
+Simply right click on the box and select Refresh Skin and you should see data flowing in.
 
 ## Note about usage display and ABB's API.
 I have found in practice that the data available from Aussie Broadband can be up to 1 hour old (despite claims that it refreshes every 15 minutes). If you log onto my Aussie or use the mobile app, you will see the same data being reported in the app as in this skin. It is just the way the ABB API works and nothing can be done about this in the skin or any other usage meter.
