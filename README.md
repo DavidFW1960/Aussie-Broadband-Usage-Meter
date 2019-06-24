@@ -46,7 +46,7 @@ Next you will be prompted for the font size - enter a number between 1 and 3. Th
 
 Next it will ask if you wish to overide ABB usage allowance. This is really only applicable for users on an unlimited plan. Almost always you will not want to do this so click NO. If you wish to track your usage (and see a usage bar for allowance used like you would if you were not on an unlimited plan then enter a value in GB here)
 
-![Use a Limit?]overide_usage.png)
+![Use a Limit?](overide_usage.png)
 
 Next you will be prompted to enter a service name for your service. eg Home or Work etc.
 
