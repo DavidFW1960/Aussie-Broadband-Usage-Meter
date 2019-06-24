@@ -36,7 +36,7 @@ You will then see a message about obtaining an authentication cookie from Aussie
 
 ![Obtaining Authentication Cookie](cookie.png)
 
-Next you will be prompted for some display options for the skin. If you are using multiple skins, you can have different options set for each skin! Enter a number between 1 and 4 to set the style required. (You can edit this later if you wise - see below)
+Next you will be prompted for some display options for the skin. If you are using multiple skins, you can have different options set for each skin! Enter a number between 1 and 4 to set the style required. (You can edit this later if you wish - see below)
 
 [Select Bar Style & Size](bar_style_size.pbg)
 
