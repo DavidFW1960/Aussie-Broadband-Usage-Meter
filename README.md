@@ -19,7 +19,7 @@ BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broa
 ## Installation steps
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
 2) Download [Aussie Broadband Usage 0.71.rmskin](/Aussie%20Broadband%20Usage%200.71.rmskin)
-3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be prompted for your Aussie Broadband login details that will be encrypted and stored locally.
+3) Run the .rmskin to install it with Rainmeter, use Manage Rainmeter to add it to desktop, you will be prompted for your Aussie Broadband login details. The Username and Password are no longer stored (since version 0.71) as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to go through the initial setup again.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
 ![ABB Skin for plans without a limit](unlimited%20plans.png)
@@ -60,7 +60,7 @@ Unlimited plans don't show the lower data percent used bar and don't show any of
 NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
 
 ## Security and Password Encryption/Encoding
-The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to gothrough the initial setup again.
+The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to go through the initial setup again.
 
 ## Changelog
 0.71 Sunday 14th April 2019 Remove debug and restore refresh token to 1/2 cookie life.
