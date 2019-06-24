@@ -17,7 +17,8 @@ Thanks also to nclemeur for identifying and fixing a password issue with complex
 BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broadband Portal and other assistance in enabling multiple accounts and services to be used.
 
 ## Installation steps
-## IMPORTANT NOTE If you are upgrading from a previous release of this skin, make sure you read the changelog below as everything has changed!
+## IMPORTANT NOTE If you are upgrading from a previous release of this skin, make sure you read the changelog below as everything has changed! OLD skins will NOT work with these new scripts and you should manually delete them.
+
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
 2) Download [Aussie Broadband Usage 0.80.rmskin](/Aussie%20Broadband%20Usage%200.80.rmskin)
 3) Run the .rmskin to install it with Rainmeter, The abb.ini skin should be automatically loaded once installed otherwise use Manage Rainmeter to add it to desktop.
@@ -32,23 +33,23 @@ Then refresh the skin (right click on it and select refresh) and follow the prom
 ![Enter User Name](enter_user_name.png)
 ![Enter Password](enter_password.png)
 
-You will then see a message about obtaining an authentication cookie from Aussie Broadband
+6) You will then see a message about obtaining an authentication cookie from Aussie Broadband
 
 ![Obtaining Authentication Cookie](cookie.png)
 
-Next you will be prompted for some display options for the skin. If you are using multiple skins, you can have different options set for each skin! Enter a number between 1 and 4 to set the style required. (You can edit this later if you wish - see below)
+7) Next you will be prompted for some display options for the skin. If you are using multiple skins, you can have different options set for each skin! Enter a number between 1 and 4 to set the style required. (You can edit this later if you wish - see below)
 
 ![Select Bar Style & Size](bar_style_size.png)
 
-Next you will be prompted for the font size - enter a number between 1 and 3. The font size selected will also set the size of the usage meter. (Again, you can edit this later if you want to, see instructions below)
+8) Next you will be prompted for the font size - enter a number between 1 and 3. The font size selected will also set the size of the usage meter. (Again, you can edit this later if you want to, see instructions below)
 
 ![Select Font Size](font_size.png)
 
-Next it will ask if you wish to overide ABB usage allowance. This is really only applicable for users on an unlimited plan. Almost always you will not want to do this so click NO. If you wish to track your usage (and see a usage bar for allowance used like you would if you were not on an unlimited plan then enter a value in GB here)
+9) Next it will ask if you wish to overide ABB usage allowance. This is really only applicable for users on an unlimited plan. Almost always you will not want to do this so click NO. If you wish to track your usage (and see a usage bar for allowance used like you would if you were not on an unlimited plan then enter a value in GB here)
 
 ![Use a Limit?](overide_usage.png)
 
-Next you will be prompted to enter a service name for your service. eg Home or Work etc.
+10) Next you will be prompted to enter a service name for your service. eg Home or Work etc.
 
 ![Enter Service Name](abb_service_name.png)
 
@@ -70,15 +71,15 @@ To change the options (bar size, style or font size) or the service friendly nam
 ## Username and Password
 The Username and Password are no longer stored (since version 0.71) as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to go through the initial setup again. You will also be prompted to give the service a friendly name that will now be displayed on the skin as well.
 
-## Example skins
-These examples don't show the new ID and service but otherwise are what you should see.
+## Examples of skins
+The other sizer show identical information but are larger.
 
 ![ABB Skin for plans with a limit](plans%20with%20limit.png)
 ![ABB Skin for plans without a limit](unlimited%20plans.png)
 ![ABB Skin Solid Bar](abb-solid.png)
 
-6) There will be one abb.ini skin file:
-Changing Font size, bar size and style via editing the abb.ini file is no longer supported.
+There will be one ABB.ini skin file:
+Changing Font size, bar size and style via editing the ABB.ini file is no longer supported.
 The mid and large font skins are now selected via the entered options instead of using a different skin.
 
 The progressive image skins look like this:
@@ -88,6 +89,10 @@ The progressive image skins look like this:
 The Manage Skin Screen looks like this:
 
 ![Manage Skin](manage-skins.png)
+
+This graphic shows the ABBUsage Skin (the default installed) with an ABB.ini skin in that folder and also a second folder with another ABB.ini skin. This second skin can be displayed at the same time as the first one and could be a different bar size/style and font size and it could be a different service ID. (See multiple services for one account section below)
+
+Additionally you can see an additional SKIN ABBUsage - Account 2 also with multiple skins. This is how you would use this skin with an additional account.. (Say Work or a Friend who's usage you monitor) See section below on multiple accounts.
 
 In Rainmeter, select Manage Skins and in the Aussie Broadband folder select abb.ini and load it (see above graphic).
 Note you can change transparency in that panel.
@@ -119,6 +124,8 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 - multiple user services for the one account are supported
 - double-click on the abb icon, not the skin to load the abb portal
 - double click the ID: Name XXXX field to re-enter the options
+- old skins will not work with the new scripts and should be manually deleted
+- the HD and jayden scripts have been updated for the new scripts and if you use those, anything you enter for the skin options will be ignored (but must be entered to complete setup) These scripts need to be manually installed if you use them as they are depreciated and removed from the rmskin installation file.
 
 0.71 Sunday 14th April 2019 Remove debug and restore refresh token to 1/2 cookie life.
 
