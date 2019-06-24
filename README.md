@@ -26,7 +26,7 @@ BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broa
 
 ![Clean message](reset_skin_message.png)
 
-Then refresh the skin (right click on it and select refresh) and follow the prompts.
+Then refresh the skin (right click on it and select refresh) and follow the prompts. The only way to execute the usage script is by refreshing the skin. Directly accessing the usage skin will result in an error being generated telling you to refresh the skin.
 
 5) You will be prompted for your Aussie Broadband login details. 
 
@@ -67,9 +67,9 @@ To change the options (bar size, style or font size) or the service friendly nam
 
 ![Re-enter Options](usage_small.png)
 
-
 ## Username and Password
-The Username and Password are no longer stored (since version 0.71) as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to go through the initial setup again. You will also be prompted to give the service a friendly name that will now be displayed on the skin as well.
+The Username and Password are no longer stored (since version 0.71) as we obtain a cookie and refresh token as per the changelog. IF you change your password, you must run the clean script ABB-Clean.vbs and you will be prompted to go through the initial setup again. You will also be prompted to give the service a friendly name that will now be displayed on the skin as well.
+The scripts are located in the folder %HOMEPATH%\Documents\Rainmeter\Skins\ABBUsage\@Resources\Scripts
 
 ## Examples of skins
 The other sizer show identical information but are larger.
@@ -103,7 +103,7 @@ For limited plans, I added a calculation to take into account how much of the cu
 
 If you are over your quota for this stage of the month the percent used bar will be red.
 
-Unlimited plans don't show the lower data percent used bar and don't show any of the allowance statistics in the tooltip. 
+Unlimited plans don't show the lower data percent used bar and don't show any of the allowance statistics in the tooltip. Unlimited plans will report a projected data use for the current month based on usage to date displayed in the tooltip.
 
 NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
 
@@ -114,12 +114,12 @@ To use this feature, create a new directory in the ABB usage folder and copy the
 Say you are wanting to monitor usage for your work and your home or for a friend - so this would be different accounts. To do this, you will need to duplicate the entire ABBUsage folder (C:\Users\YOUR_USER\Documents\Rainmeter\Skins\ABBUsage to say C:\Users\YOUR_USER\Documents\Rainmeter\Skins\ABBWorkUsage) When you use the manage screen to load that skin from a new folder it will ask for setup credentials for the new account as well as style information.
 
 ## Security and Password Encryption/Encoding
-The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, the credentials will be invalidated and you will be prompted to go through the initial setup again.
+The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, as per above instructions, run the ABB-Clean.vbs script and you will be prompted to go through the initial setup again.
 
 ## Changelog
-## New in version 0.80
-- Uses options when setting up to select bas style and size as well as font size instead of having seperate sking.
-- Data xml files are no longer stored in the scripts folder 
+## New in version 0.80 25/06/2019
+- Uses options when setting up to select bar style and size as well as font size instead of having seperate sking.
+- Data xml files are no longer stored in the scripts folder. All raw data and configuration files are stored in %APPDATA%\Rainmeter-ABB
 - multiple user accounts is supported
 - multiple user services for the one account are supported
 - double-click on the abb icon, not the skin to load the abb portal
