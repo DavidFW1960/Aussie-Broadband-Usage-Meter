@@ -1,3 +1,8 @@
+' Description: Backend script for ABBUsage Rainmeter skin by Big Kahuna
+' Author: Protogen at whirlpool (skin by Big Kahuna)
+' Version: 3.3.1
+' Date: 18 July 2019
+
 '-------------------------------------------------------------------------------
 ' Environment, constants, global variables
 '-------------------------------------------------------------------------------
@@ -302,31 +307,38 @@ Class AuthCookie
   Public Property Let SetCookie(ByVal strSetCookie)
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Let SetCookie"
 
-    Dim objRegExp, cookieParts
-    Set objRegExp = New RegExp
+    Dim objRegExpCookie, strCookie, strExpiry
+    Set objRegExpCookie = New RegExp
 
-    objRegExp.Pattern = "^.* (\d+-\w+-\d+ \d+:\d+:\d+) .*$"
+    ' Extract the correct 'Set-Cookie:' line from all response headers
+    objRegExpCookie.Pattern = "[\s\S]*\r\n(Set-Cookie:\s+myaussie_cookie=.+)\r\n[\s\S]*"
+    strSetCookie = objRegExpCookie.Replace(strSetCookie, "$1")
 
-    cookieParts = Split(strSetCookie, ";")
-    cookieParts(1) = objRegExp.Replace(cookieParts(1), "$1")
+    ' Extract the 'myaussie_cookie=' cookie field from the line
+    objRegExpCookie.Pattern = "^.+(myaussie_cookie=[^;]+);.+$"
+    strCookie = objRegExpCookie.Replace(strSetCookie, "$1")
 
-    If IsEmpty(cookieParts(0)) Or cookieParts(0) = "" Then
+    ' Extract the 'expires=' date field from the line
+    objRegExpCookie.Pattern = "^.+expires=\w+,\s+(\d+-\w+-\d+ \d+:\d+:\d+)\s.+$"
+    strExpiry = objRegExpCookie.Replace(strSetCookie, "$1")
+
+    If IsEmpty(strCookie) Or strCookie = "" Then
       If debugMode Then objDebugLog.Message "error", TypeName(Me), "Cookie is undefined or blank"
       WScript.Quit
     End If
 
-    If IsEmpty(cookieParts(1)) Or cookieParts(1) = "" Then
+    If IsEmpty(strExpiry) Or strExpiry = "" Then
       If debugMode Then objDebugLog.Message "error", TypeName(Me), "Expiry is undefined or blank"
       WScript.Quit
     End If
 
     If debugMode Then
-      objDebugLog.Message "info", TypeName(Me), "Cookie Length = '" & Len(cookieParts(0)) & "'"
-      objDebugLog.Message "info", TypeName(Me), "Cookie Expiry = '" & cookieParts(1) & "'"
+      objDebugLog.Message "info", TypeName(Me), "Cookie length = '" & Len(strCookie) & "'"
+      objDebugLog.Message "info", TypeName(Me), "Cookie Expiry = '" & strExpiry & "'"
     End If
 
-    Me.Cookie = cookieParts(0)
-    Me.Expiry = cookieParts(1)
+    Me.Cookie = strCookie
+    Me.Expiry = strExpiry
   End Property
 
   '-------------------------------------------------------------------------------
@@ -766,7 +778,7 @@ Class HTTPRequest
 
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Request was successful"
 
-    SetCookie = objWinHTTP.GetResponseHeader("Set-Cookie")
+    SetCookie = objWinHTTP.GetAllResponseHeaders()
     ResponseText = objWinHTTP.ResponseText
   End Sub
 
@@ -1284,10 +1296,10 @@ Class Service
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Sub CreateService"
 
     Dim objHTTPRequest, objJSON, serviceFileContents
-    Dim maxLen, strMessage, objRegExp, userResponse
+    Dim maxLen, strMessage, objRegExpResponse, userResponse
     Set objHTTPRequest = New HTTPRequest
     Set objJSON = New JSON
-    Set objRegExp = New RegExp
+    Set objRegExpResponse = New RegExp
 
     objHTTPRequest.Request = "GET"
     objHTTPRequest.URL = serviceURL
@@ -1309,9 +1321,9 @@ Class Service
                  "(e.g. 'Home', 'Home2', 'Work', 'Primary')" & vbCRLF & vbCRLF & _
                  "Service Name (alphanumeric only; max " & maxLen & " chars)?"
 
-    objRegExp.Pattern = "^\w+$"
+    objRegExpResponse.Pattern = "^\w+$"
 
-    Do Until objRegExp.Test(userResponse)
+    Do Until objRegExpResponse.Test(userResponse)
       userResponse = InputBox(strMessage, appTitle)
     Loop
 
