@@ -117,6 +117,9 @@ Say you are wanting to monitor usage for your work and your home or for a friend
 The Username and Password are no longer stored as we obtain a cookie and refresh token as per the changelog. IF you change your password, as per above instructions, run the ABB-Clean.vbs script and you will be prompted to go through the initial setup again.
 
 ## Changelog
+
+0.81 - Fix for ABB switching to use Cloudflare and new cookie structure
+
 ## New in version 0.80 25/06/2019
 - Uses options when setting up to select bar style and size as well as font size instead of having seperate sking.
 - Data xml files are no longer stored in the scripts folder. All raw data and configuration files are stored in %APPDATA%\Rainmeter-ABB
