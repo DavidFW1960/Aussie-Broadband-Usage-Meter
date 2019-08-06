@@ -1,7 +1,7 @@
 ' Description: Backend script for ABBUsage Rainmeter skin by Big Kahuna
 ' Author: Protogen at whirlpool (skin by Big Kahuna)
-' Version: 3.3.1
-' Date: 18 July 2019
+' Version: 3.5.0
+' Date: 5 Aug 2019
 
 '-------------------------------------------------------------------------------
 ' Environment, constants, global variables
@@ -37,7 +37,7 @@ If WScript.Arguments.Count = 2 Or WScript.Arguments.Count = 3 Then
   objDebugLog.Logname = Replace(objDebugLog.Logname, ".ini", "")
   objDebugLog.Logname = Replace(objDebugLog.Logname, "\", "-")
 
-  appTitle = appTitle & " [" & WScript.Arguments.Item(0) & "]"
+  appTitle = appTitle & " [" & WScript.Arguments.Item(0) & "\" & WScript.Arguments.Item(1) & "]"
 
   ' Delete old files and update the usage
   If WScript.Arguments.Count = 2 Then
@@ -756,7 +756,7 @@ Class HTTPRequest
       If Username <> "" And Password <> "" Then
         MsgBox "Failed to obtain an authentication cookie from the " & rspName & " portal." & vbCRLF & _
                "Possible network error - please check your connection and try again." & vbCRLF & vbCRLF & _
-               "(If the problem persist enable debug mode)", 16, appTitle
+               "(If the problem persists, post the issue on whirlpool)", 16, appTitle
       End If
       WScript.Quit
     End If
@@ -771,7 +771,7 @@ Class HTTPRequest
       If Username <> "" And Password <> "" Then
         MsgBox "Failed to obtain an authentication cookie from the " & rspName & " portal." & vbCRLF & _
                "Please check your username and password and try again." & vbCRLF & vbCRLF & _
-               "(If the problem persist enable debug mode)", 16, appTitle
+               "(If the problem persists, post the issue on whirlpool)", 16, appTitle
       End If
       WScript.Quit
     End If
@@ -789,10 +789,10 @@ Class HTTPRequest
   Private Function PercentEncode(strPlain)
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function PercentEncode"
 
-    Dim strEncoded, pos, currentChar, ansiVal
+    Dim strEncoded, index, currentChar, ansiVal
 
-    For pos = 1 to Len(strPlain)
-      currentChar = Mid(strPlain, pos, 1)
+    For index = 1 to Len(strPlain)
+      currentChar = Mid(strPlain, index, 1)
       ansiVal = Asc(currentChar)
 
       ' Do not encode numbers, uppercase and lowercase letters
@@ -1004,6 +1004,79 @@ Class Auth
 End Class
 
 '-------------------------------------------------------------------------------
+' Class - UserSelection
+'-------------------------------------------------------------------------------
+
+Class UserSelection
+
+  Private p_desc
+  Private p_dict
+
+  '-------------------------------------------------------------------------------
+  ' Property - Desc
+  '-------------------------------------------------------------------------------
+
+  Public Property Let Desc(strDesc)
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Let Desc"
+
+    p_desc = strDesc
+  End Property
+
+  Public Property Get Desc()
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Get Desc"
+
+    Desc = p_desc
+  End Property
+
+  '-------------------------------------------------------------------------------
+  ' Property - Dict
+  '-------------------------------------------------------------------------------
+
+  Public Property Let Dict(objDict)
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Let Dict"
+
+    Set p_dict = objDict
+  End Property
+
+  Public Property Get Dict()
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Get Dict"
+
+    Set Dict = p_dict
+  End Property
+
+  '-------------------------------------------------------------------------------
+  ' Function - GetUserSelection
+  '-------------------------------------------------------------------------------
+
+  Public Function GetUserSelection()
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function GetUserSelection"
+
+    Dim arrDictKeys, strMessage, index, userResponse
+
+    arrDictKeys = Me.Dict.Keys
+    strMessage = "Please select the " & Me.Desc & " for this skin" & vbCRLF & vbCRLF
+    For index = 1 to Me.Dict.Count
+      strMessage = strMessage & CStr(index) & " - " & arrDictKeys(index - 1) & vbCRLF
+    Next
+    strMessage = strMessage & vbCRLF & "Selection (1 - " & Me.Dict.Count & ")?"
+
+    Do Until 1 <= userResponse And userResponse <= Me.Dict.Count
+      userResponse = InputBox(strMessage, appTitle)
+      If IsNumeric(userResponse) Then
+        userResponse = CInt(userResponse)
+      Else
+        userResponse = 0
+      End If
+    Loop
+
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User response = '" & userResponse & "'"
+
+    GetUserSelection = arrDictKeys(userResponse - 1)
+  End Function
+
+End Class
+
+'-------------------------------------------------------------------------------
 ' Class - Options
 '-------------------------------------------------------------------------------
 
@@ -1083,19 +1156,22 @@ Class Options
   Private Function GetBarStyleSize()
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function GetBarStyleSize"
 
-    Dim objBarStyleSize, userSelection
-    Set objBarStyleSize = CreateObject("Scripting.Dictionary")
+    Dim objDict, objUserSelection, userSelection
+    Set objDict = CreateObject("Scripting.Dictionary")
+    Set objUserSelection = New UserSelection
 
-    objBarStyleSize.Add "Dashed 5px", "image5px"
-    objBarStyleSize.Add "Dashed 8px", "image8px"
-    objBarStyleSize.Add "Solid 5px",  "solid5px"
-    objBarStyleSize.Add "Solid 8px",  "solid8px"
+    objDict.Add "Dashed 5px", "image5px"
+    objDict.Add "Dashed 8px", "image8px"
+    objDict.Add "Solid 5px",  "solid5px"
+    objDict.Add "Solid 8px",  "solid8px"
 
-    userSelection = GetUserSelection(objBarStyleSize, "bar style and size")
+    objUserSelection.Desc = "bar style and size"
+    objUserSelection.Dict = objDict
+    userSelection = objUserSelection.GetUserSelection()
 
-    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User selection = '" & objBarStyleSize(userSelection) & "'"
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User selection = '" & objDict(userSelection) & "'"
 
-    GetBarStyleSize = objBarStyleSize(userSelection)
+    GetBarStyleSize = objDict(userSelection)
   End Function
 
   '-------------------------------------------------------------------------------
@@ -1105,48 +1181,21 @@ Class Options
   Private Function GetFontSize()
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function GetFontSize"
 
-    Dim objFontSize, userSelection
-    Set objFontSize = CreateObject("Scripting.Dictionary")
+    Dim objDict, objUserSelection, userSelection
+    Set objDict = CreateObject("Scripting.Dictionary")
+    Set objUserSelection = New UserSelection
 
-    objFontSize.Add "Small (8px)",   "small"
-    objFontSize.Add "Medium (12px)", "medium"
-    objFontSize.Add "Large (16px)",  "large"
+    objDict.Add "Small (8px)",   "small"
+    objDict.Add "Medium (12px)", "medium"
+    objDict.Add "Large (16px)",  "large"
 
-    userSelection = GetUserSelection(objFontSize, "font size")
+    objUserSelection.Desc = "font size"
+    objUserSelection.Dict = objDict
+    userSelection = objUserSelection.GetUserSelection()
 
-    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User selection = '" & objFontSize(userSelection) & "'"
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User selection = '" & objDict(userSelection) & "'"
 
-    GetFontSize = objFontSize(userSelection)
-  End Function
-
-  '-------------------------------------------------------------------------------
-  ' Function - GetUserSelection
-  '-------------------------------------------------------------------------------
-
-  Public Function GetUserSelection(objDict, strSelectionName)
-    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function GetUserSelection"
-
-    Dim arrDictKeys, strMessage, pos, userResponse
-
-    arrDictKeys = objDict.Keys
-    strMessage = "Please select the " & strSelectionName & " for this skin" & vbCRLF & vbCRLF
-    For pos = 1 to objDict.Count
-      strMessage = strMessage & CStr(pos) & " - " & arrDictKeys(pos - 1) & vbCRLF
-    Next
-    strMessage = strMessage & vbCRLF & "Selection (1 - " & objDict.Count & ")?"
-
-    Do Until 1 <= userResponse And userResponse <= objDict.Count
-      userResponse = InputBox(strMessage, appTitle)
-      If IsNumeric(userResponse) Then
-        userResponse = CInt(userResponse)
-      Else
-        userResponse = 0
-      End If
-    Loop
-
-    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User response = '" & userResponse & "'"
-
-    GetUserSelection = arrDictKeys(userResponse - 1)
+    GetFontSize = objDict(userSelection)
   End Function
 
   '-------------------------------------------------------------------------------
@@ -1282,9 +1331,9 @@ Class Service
     End If
 
     objAuth.GetAuth()
-    objOptions.EnsureOptionsExist()
 
     If Not objServiceFile.FileExists() Then CreateService()
+    objOptions.EnsureOptionsExist()
     LoadService()
   End Sub
 
@@ -1308,7 +1357,7 @@ Class Service
 
     objJSON.JSONText = objHTTPRequest.ResponseText
 
-    Me.ServiceID = objJSON.JSONStruct.services.NBN.[0].service_id
+    Me.ServiceID = GetServiceID(objJSON)
 
     If IsEmpty(Me.ServiceID) Or Me.ServiceID = "" Then
       If debugMode Then objDebugLog.Message "error", TypeName(Me), "ServiceID is undefined or blank"
@@ -1316,7 +1365,7 @@ Class Service
     End If
 
     maxLen = 16 - Len(Me.ServiceID)
-    strMessage = "Your " & rspName & " NBN Service ID is " & Me.ServiceID & vbCRLF & vbCRLF & _
+    strMessage = "Your NBN Service ID for this skin is " & Me.ServiceID & vbCRLF & vbCRLF & _
                  "Please enter a name for this service" & vbCRLF & _
                  "(e.g. 'Home', 'Home2', 'Work', 'Primary')" & vbCRLF & vbCRLF & _
                  "Service Name (alphanumeric only; max " & maxLen & " chars)?"
@@ -1341,6 +1390,48 @@ Class Service
 
     objServiceFile.Contents = serviceFileContents
   End Sub
+
+  '-------------------------------------------------------------------------------
+  ' Function - GetServiceID
+  '-------------------------------------------------------------------------------
+
+  Private Function GetServiceID(objJSON)
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Function GetServiceID"
+
+    Dim serviceCount
+    serviceCount = objJSON.JSONStruct.services.NBN.Length
+
+    If serviceCount <= 0 Then
+      If debugMode Then objDebugLog.Message "error", TypeName(Me), "NBN array (customer JSON) is empty or missing"
+      MsgBox "Failed to obtain an NBN Service ID from the " & rspName & " portal." & vbCRLF & _
+             "Possible " & rspName & " portal change - please try again." & vbCRLF & vbCRLF & _
+             "(If the problem persists, post the issue on whirlpool)", 16, appTitle
+      WScript.Quit
+    ElseIf serviceCount = 1 Then
+      GetServiceID = objJSON.JSONStruct.services.NBN.[0].service_id
+      If debugMode Then objDebugLog.Message "info", TypeName(Me), "Single NBN Service ID found = '" & GetServiceID & "'"
+      Exit Function
+    End If
+
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "Multiple NBN Service IDs found"
+
+    Dim objDict, index, serviceID, objUserSelection, userSelection
+    Set objDict = CreateObject("Scripting.Dictionary")
+    Set objUserSelection = New UserSelection
+
+    For index = 0 to (serviceCount - 1)
+      serviceID = Eval("objJSON.JSONStruct.services.NBN.[" & index & "].service_id")
+      objDict.Add serviceID, serviceID
+    Next
+
+    objUserSelection.Desc = "NBN Service ID"
+    objUserSelection.Dict = objDict
+    userSelection = objUserSelection.GetUserSelection()
+
+    If debugMode Then objDebugLog.Message "info", TypeName(Me), "User selection = '" & objDict(userSelection) & "'"
+
+    GetServiceID = objDict(userSelection)
+  End Function
 
   '-------------------------------------------------------------------------------
   ' Sub - LoadService

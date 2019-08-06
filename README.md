@@ -108,7 +108,12 @@ Unlimited plans don't show the lower data percent used bar and don't show any of
 NOTE: Some users have problems with default secure protocols (I've had reports from users running Windows 7, 64 bit) Applying a [Microsoft hotfix has been reported to fix this](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-a-default-secure-protocols-in#easy)
 
 ## Multiple Services for the one account
-To use this feature, create a new directory in the ABB usage folder and copy the ABB.ini skin to that folder. Any folder under ABBUsage (the default) will use the SAME ABB logon username/password and the same cookie. In the next release (coming soon) multiple accounts will be detected as part of the setup.
+To use this feature, create a new directory in the ABB usage folder and copy the ABB.ini skin to that folder. Any folder under ABBUsage (the default) will use the SAME ABB logon username/password and the same cookie. 
+In this release multiple accounts are detected as part of the setup and you will be prompted to select the service id from the list of detected service id's.
+
+![Select Service ID](multi-service-prompt.png)
+
+You will then be asked for a friendly name for the service as per a standard configuration.
 
 ## Multiple Accounts
 Say you are wanting to monitor usage for your work and your home or for a friend - so this would be different accounts. To do this, you will need to duplicate the entire ABBUsage folder (C:\Users\YOUR_USER\Documents\Rainmeter\Skins\ABBUsage to say C:\Users\YOUR_USER\Documents\Rainmeter\Skins\ABBWorkUsage) When you use the manage screen to load that skin from a new folder it will ask for setup credentials for the new account as well as style information.
@@ -118,6 +123,7 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 
 ## Changelog
 
+0.82 - Adds prompts if multiple services are detected
 0.81 - Fix for ABB switching to use Cloudflare and new cookie structure
 
 ## New in version 0.80 25/06/2019
