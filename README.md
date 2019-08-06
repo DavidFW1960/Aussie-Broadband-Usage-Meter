@@ -20,7 +20,7 @@ BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broa
 ## IMPORTANT NOTE If you are upgrading from a previous release of this skin, make sure you read the changelog below as everything has changed! OLD skins will NOT work with these new scripts and you should manually delete them.
 
 1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
-2) Download [Aussie Broadband Usage 0.81.rmskin](/Aussie%20Broadband%20Usage%200.81.rmskin)
+2) Download [Aussie Broadband Usage 0.82.rmskin](/Aussie%20Broadband%20Usage%200.82.rmskin)
 3) Run the .rmskin to install it with Rainmeter, The abb.ini skin should be automatically loaded once installed otherwise use Manage Rainmeter to add it to desktop.
 4) There will be 2 script files installed. One called ABB-Clean.vbs will delete all information currently stored and will give a message:
 
@@ -124,6 +124,7 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 ## Changelog
 
 0.82 - Adds prompts if multiple services are detected
+
 0.81 - Fix for ABB switching to use Cloudflare and new cookie structure
 
 ## New in version 0.80 25/06/2019
