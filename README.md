@@ -124,6 +124,7 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 ## Changelog
 
 0.82 - Adds prompts if multiple services are detected
+
 0.81 - Fix for ABB switching to use Cloudflare and new cookie structure
 
 ## New in version 0.80 25/06/2019
