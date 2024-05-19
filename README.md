@@ -19,7 +19,7 @@ BIG THANKS to Protogen for updating the scripts to work with the new Aussie Broa
 ## Installation steps
 ## IMPORTANT NOTE If you are upgrading from a previous release of this skin, make sure you read the changelog below as everything has changed! OLD skins will NOT work with these new scripts and you should manually delete them.
 
-1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.1)
+1) Install [Rainmeter](https://www.rainmeter.net/) (Minimum Version 4.5.18.3727)
 2) Download [Aussie Broadband Usage 0.83.rmskin](/Aussie%20Broadband%20Usage%200.83.rmskin)
 3) Run the .rmskin to install it with Rainmeter, The abb.ini skin should be automatically loaded once installed otherwise use Manage Rainmeter to add it to desktop.
 4) There will be 2 script files installed. One called ABB-Clean.vbs will delete all information currently stored and will give a message:
