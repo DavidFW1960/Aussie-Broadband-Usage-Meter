@@ -1,7 +1,7 @@
 ' Description: Backend script for ABBUsage Rainmeter skin by Big Kahuna
 ' Author: Protogen at whirlpool (skin by Big Kahuna)
-' Version: 3.5.0
-' Date: 5 Aug 2019
+' Version: 3.5.1
+' Date: 18 May 2024
 
 '-------------------------------------------------------------------------------
 ' Environment, constants, global variables
@@ -319,7 +319,7 @@ Class AuthCookie
     strCookie = objRegExpCookie.Replace(strSetCookie, "$1")
 
     ' Extract the 'expires=' date field from the line
-    objRegExpCookie.Pattern = "^.+expires=\w+,\s+(\d+-\w+-\d+ \d+:\d+:\d+)\s.+$"
+    objRegExpCookie.Pattern = "^.*expires=\w+,\s*(\d+\s+\w+\s+\d+\s+\d+:\d+:\d+)\s.*$"
     strExpiry = objRegExpCookie.Replace(strSetCookie, "$1")
 
     If IsEmpty(strCookie) Or strCookie = "" Then
