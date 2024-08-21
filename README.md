@@ -123,6 +123,8 @@ The Username and Password are no longer stored as we obtain a cookie and refresh
 
 ## Changelog
 
+0.84 - Allows for skin and script to display show and recover feom bad received data from ABB
+
 0.83 - Fixes changes in the cookie made by ABB
 
 0.82 - Adds prompts if multiple services are detected
