@@ -1,7 +1,7 @@
 ' Description: Backend script for ABBUsage Rainmeter skin by Big Kahuna
 ' Author: Protogen at whirlpool (skin by Big Kahuna)
-' Version: 3.5.1
-' Date: 18 May 2024
+' Version: 3.5.2
+' Date: 5 August 2024
 
 '-------------------------------------------------------------------------------
 ' Environment, constants, global variables
@@ -319,7 +319,7 @@ Class AuthCookie
     strCookie = objRegExpCookie.Replace(strSetCookie, "$1")
 
     ' Extract the 'expires=' date field from the line
-    objRegExpCookie.Pattern = "^.*expires=\w+,\s*(\d+\s+\w+\s+\d+\s+\d+:\d+:\d+)\s.*$"
+    objRegExpCookie.Pattern = "^.*expires=\w+,\s*(\d+(?:\s+|-)\w+(?:\s+|-)\d+\s+\d+:\d+:\d+)\s.*$"
     strExpiry = objRegExpCookie.Replace(strSetCookie, "$1")
 
     If IsEmpty(strCookie) Or strCookie = "" Then
@@ -1585,6 +1585,10 @@ Class Usage
     objUsageFileJSON.Contents = objHTTPRequest.ResponseText
     objJSON.JSONText          = objHTTPRequest.ResponseText
 
+    ' For testing, simulates bad data from ABB
+    'objUsageFileJSON.Contents = "{""usedMb"":0,""downloadedMb"":0,""uploadedMb"":0,""daysTotal"":31,""daysRemaining"":11,""remainingMb"":null,""lastUpdated"":null}"
+    'objJSON.JSONText          = "{""usedMb"":0,""downloadedMb"":0,""uploadedMb"":0,""daysTotal"":31,""daysRemaining"":11,""remainingMb"":null,""lastUpdated"":null}"
+
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "JSON " & objHTTPRequest.ResponseText
   End Sub
 
@@ -1596,24 +1600,39 @@ Class Usage
     If debugMode Then objDebugLog.Message "info", TypeName(Me), "Entering Sub CreateUsageXML"
 
     Dim downBytes, upBytes, allowanceMBytes, leftBytes
-    Dim lastUpdated, daysRemaining, rolloverDay
+    Dim currentTime, lastUpdated, daysRemaining, rolloverDay
     Dim usageFileContents
 
     downBytes = objJSON.JSONStruct.downloadedMb * 1000 * 1000
     upBytes   = objJSON.JSONStruct.uploadedMb   * 1000 * 1000
 
-    If IsNull(objJSON.JSONStruct.remainingMb) Then
-      ' Unlimited plan (skin uses allowance1_mb >= 100,000,000 as trigger)
+    If IsNull(objJSON.JSONStruct.remainingMb) And IsNull(objJSON.JSONStruct.lastUpdated) Then
+      ' Bad data (from ABB), use negative values to signal "bad data" to skin
+      downBytes       = -1000 * 1000 * 1000
+      upBytes         = 0
+      allowanceMBytes = -1000
+      leftBytes       = 0
+    ElseIf IsNull(objJSON.JSONStruct.remainingMb) Then
+      ' Unlimited plan, skin uses allowance1_mb >= 100,000,000 as trigger
       allowanceMBytes = 100000000
       leftBytes       = 0
     Else
+      ' Good data (from ABB), use actual values from ABB
       allowanceMBytes = objJSON.JSONStruct.usedMb + objJSON.JSONStruct.remainingMb
       leftBytes       = objJSON.JSONStruct.remainingMb * 1000 * 1000
     End If
 
-    lastUpdated   = objJSON.JSONStruct.lastUpdated
-    daysRemaining = objJSON.JSONStruct.daysRemaining
+    If IsNull(objJSON.JSONStruct.lastUpdated) Then
+      ' Bad data (from ABB), use current date and time (format: YYYY-MM-DD HH:MM:SS)
+      currentTime = Now()
+      lastUpdated = Right("20" & Year(currentTime), 4) & "-" & Right("0" & Month(currentTime), 2) & "-" & Right("0" & Day(currentTime), 2) & " "
+      lastUpdated = lastUpdated & Right("0" & Hour(currentTime), 2) & ":" & Right("0" & Minute(currentTime), 2) & ":" & Right("0" & Second(currentTime), 2)
+    Else
+      ' Good data (from ABB), use date and time from ABB
+      lastUpdated = objJSON.JSONStruct.lastUpdated
+    End If
 
+    daysRemaining = objJSON.JSONStruct.daysRemaining
     rolloverDay = Day(DateAdd("d", daysRemaining, lastUpdated))
 
     usageFileContents = _
